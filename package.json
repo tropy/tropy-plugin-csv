@@ -1,0 +1,55 @@
+{
+  "name": "tropy-plugin-csv",
+  "version": "0.1.0",
+  "description": "Tropy to CSV Export Plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "electron-mocha --renderer test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inukshuk/tropy-plugin-csv.git"
+  },
+  "keywords": [
+    "tropy",
+    "csv"
+  ],
+  "author": "Sylvester Keil <sylvester@keil.or.at>",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/inukshuk/tropy-plugin-csv/issues"
+  },
+  "homepage": "https://github.com/inukshuk/tropy-csv#readme",
+  "hooks": {
+    "export": true
+  },
+  "options": [
+    {
+      "field": "file",
+      "label": "File name",
+      "default": "tropy.csv"
+    },
+    {
+      "field": "quotes",
+      "label": "Wrap values with quotes?",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "field": "header",
+      "label": "Print CSV header line?",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "field": "clipboard",
+      "label": "Copy to clipboard?",
+      "type": "boolean",
+      "default": false
+    }
+  ],
+  "devDependencies": {
+    "electron": "^4.0.6",
+    "electron-mocha": "^6.0.4"
+  }
+}
