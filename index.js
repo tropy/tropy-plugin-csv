@@ -90,6 +90,7 @@ CSVPlugin.defaults = {
     ['author', 'crator'],
     ['recipient', 'audience'],
     ['date'],
+    ['location', 'coverage'],
     ['type']
   ],
   file: 'tropy.csv',
