@@ -1,6 +1,6 @@
 {
   "name": "tropy-plugin-csv",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tropy to CSV Export Plugin",
   "main": "index.js",
   "scripts": {
