@@ -10,15 +10,28 @@ class CSVPlugin {
     this.context = context
   }
 
-  columns(item) {
-    return this.options.columns
-      .map(p => this.encode(first(item, p)))
+  columns(template, item) {
+    return template
+      .fields
+      .map(f => this.encode(this.value(item[f.property])))
   }
+
+  header(template) {
+    return template
+      .fields
+      .map(f => this.encode(f.property))
+      .join(',')
+  }
+
 
   encode(string) {
     return this.options.quotes ?
       `"${string == null ? '' : string.replace(/"+/, '""')}"` :
       `${string == null ? '' : string.replace(/,/, '')}`
+  }
+
+  value(value) {
+    return value && value[0] && value[0]['@value']
   }
 
   async getWriteStream() {
@@ -38,22 +51,30 @@ class CSVPlugin {
     })
   }
 
+  async expand(data) {
+    return this.context.require('jsonld').expand(data)
+  }
+
   async export(data) {
-    this.logger.info('Exporting items as CSV...', { options: this.options })
+    this.logger.trace('Exporting items as CSV...')
 
     let ws = await this.getWriteStream()
-    if (!ws) return null
+    if (!ws || !data.length) return null
+
+    let template = loadTemplate(data[0].template)
 
     if (this.options.header) {
-      ws.write(`${this.header}\n`)
+      ws.write(`${this.header(template)}\n`)
     }
 
-    for (let items of data) {
+    let xData = await this.expand(data)
+
+    for (let items of xData) {
       for (let item of items['@graph']) {
         try {
-          ws.write(`${this.columns(item).join(',')}\n`)
+          ws.write(`${this.columns(template, item).join(',')}\n`)
         } catch (e) {
-          this.logger.error(e.message)
+          this.logger.error({ stack: e.stack }, e.message)
         }
       }
     }
@@ -72,12 +93,6 @@ class CSVPlugin {
     )
   }
 
-  get header() {
-    return this.options.columns
-      .map(c => this.encode(c[0]))
-      .join(',')
-  }
-
   get logger() {
     return this.context.logger
   }
@@ -85,14 +100,6 @@ class CSVPlugin {
 
 CSVPlugin.defaults = {
   clipboard: false,
-  columns: [
-    ['title'],
-    ['author', 'crator'],
-    ['recipient', 'audience'],
-    ['date'],
-    ['location', 'coverage'],
-    ['type']
-  ],
   file: 'tropy.csv',
   header: false,
   quotes: true
@@ -115,10 +122,7 @@ class ClipboardWriter {
   }
 }
 
-function first(item, props) {
-  for (let key of props) {
-    if (key in item) return item[key]
-  }
-}
+const loadTemplate = id =>
+  global.state.ontology.template[id]
 
 module.exports = CSVPlugin
