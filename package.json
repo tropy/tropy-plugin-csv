@@ -25,9 +25,22 @@
   },
   "options": [
     {
-      "field": "file",
-      "label": "File name",
-      "default": "tropy.csv"
+      "field": "tags",
+      "label": "Include tags?",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "field": "photos",
+      "label": "Include photos?",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "field": "notes",
+      "label": "Include notes?",
+      "type": "boolean",
+      "default": false
     },
     {
       "field": "quotes",
@@ -46,6 +59,11 @@
       "label": "Copy to clipboard?",
       "type": "boolean",
       "default": false
+    },
+    {
+      "field": "file",
+      "label": "Default file name",
+      "default": "tropy.csv"
     }
   ],
   "devDependencies": {

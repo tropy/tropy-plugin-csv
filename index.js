@@ -4,6 +4,8 @@ const { createWriteStream } = require('fs')
 const { clipboard, remote } = require('electron')
 const { join } = require('path')
 
+const TROPY = 'https://tropy.org/v1/tropy'
+
 class CSVPlugin {
   constructor(options, context) {
     this.options = Object.assign({}, CSVPlugin.defaults, options)
@@ -11,27 +13,54 @@ class CSVPlugin {
   }
 
   columns(template, item) {
-    return template
-      .fields
-      .map(f => this.encode(this.value(item[f.property])))
+    let c = template.fields.map(f =>
+      this.encode(value(item[f.property])))
+
+    if (this.options.tags)
+      c.push(this.encode(value(item[`${TROPY}#tag`], ', ')))
+
+    if (this.options.photos)
+      c.push(this.encode(this.getPhotoPaths(item)))
+
+    if (this.options.notes)
+      c.push(this.encode(this.getPhotoNotes(item)))
+
+    return c.join(',')
+  }
+
+  getPhotoPaths(item, sep = ';') {
+    return list(item, `${TROPY}#photo`)
+      .map(x => value(x[`${TROPY}#path`]))
+      .join(sep)
+  }
+
+  getPhotoNotes(item, sep = '\n---\n') {
+    return list(item, `${TROPY}#photo`)
+      .flatMap(x => this.getNotes(x, sep))
+      .filter(x => x != null && x.length > 0)
+      .join(sep)
+  }
+
+  getNotes(photo, sep) {
+    return list(photo, `${TROPY}#note`)
+      .map(x => value(x[`${TROPY}#text`]))
+      .join(sep)
   }
 
   header(template) {
-    return template
-      .fields
-      .map(f => this.encode(f.property))
-      .join(',')
-  }
+    let h = template.fields.map(f => this.encode(f.property))
 
+    if (this.options.tags) h.push('Tags')
+    if (this.options.photos) h.push('Photos')
+    if (this.options.notes) h.push('Notes')
+
+    return h.join(',')
+  }
 
   encode(string) {
     return this.options.quotes ?
       `"${string == null ? '' : string.replace(/"+/, '""')}"` :
       `${string == null ? '' : string.replace(/,/, '')}`
-  }
-
-  value(value) {
-    return value && value[0] && value[0]['@value']
   }
 
   async getWriteStream() {
@@ -72,7 +101,7 @@ class CSVPlugin {
     for (let items of xData) {
       for (let item of items['@graph']) {
         try {
-          ws.write(`${this.columns(template, item).join(',')}\n`)
+          ws.write(`${this.columns(template, item)}\n`)
         } catch (e) {
           this.logger.error({ stack: e.stack }, e.message)
         }
@@ -102,7 +131,10 @@ CSVPlugin.defaults = {
   clipboard: false,
   file: 'tropy.csv',
   header: false,
-  quotes: true
+  notes: false,
+  photos: false,
+  quotes: true,
+  tags: true
 }
 
 
@@ -121,6 +153,17 @@ class ClipboardWriter {
     this.buffer.push(string)
   }
 }
+
+const list = (item, prop) => {
+  try {
+    return item[prop][0]['@list']
+  } catch (_) {
+    return []
+  }
+}
+
+const value = (val, sep = ',') =>
+    val ? val.map(v => v['@value']).join(sep) : null
 
 const loadTemplate = id =>
   global.state.ontology.template[id]
