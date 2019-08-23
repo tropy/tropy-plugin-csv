@@ -40,7 +40,7 @@
       "field": "notes",
       "label": "Include notes?",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     {
       "field": "quotes",
@@ -52,7 +52,7 @@
       "field": "header",
       "label": "Print CSV header line?",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     {
       "field": "clipboard",
@@ -62,7 +62,8 @@
     },
     {
       "field": "template",
-      "label": "Template Id",
+      "label": "Template",
+      "hint": "The id of the Tropy template use. The template determines which fields will be exported. If left empty, the first item's template will be used.",
       "default": ""
     },
     {
