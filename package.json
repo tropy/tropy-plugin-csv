@@ -61,13 +61,18 @@
       "default": false
     },
     {
+      "field": "template",
+      "label": "Template Id",
+      "default": ""
+    },
+    {
       "field": "file",
       "label": "Default file name",
       "default": "tropy.csv"
     }
   ],
   "devDependencies": {
-    "electron": "^4.0.6",
-    "electron-mocha": "^6.0.4"
+    "electron": "^5.0",
+    "electron-mocha": "^8.1.1"
   }
 }

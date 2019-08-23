@@ -90,7 +90,9 @@ class CSVPlugin {
     let ws = await this.getWriteStream()
     if (!ws || !data.length) return null
 
-    let template = loadTemplate(data[0].template)
+    let template = loadTemplate(
+      this.options.template,
+      data[0].template)
 
     if (this.options.header) {
       ws.write(`${this.header(template)}\n`)
@@ -134,7 +136,8 @@ CSVPlugin.defaults = {
   notes: false,
   photos: false,
   quotes: true,
-  tags: true
+  tags: true,
+  template: '',
 }
 
 
@@ -165,7 +168,9 @@ const list = (item, prop) => {
 const value = (val, sep = ',') =>
     val ? val.map(v => v['@value']).join(sep) : null
 
-const loadTemplate = id =>
-  global.state.ontology.template[id]
+const loadTemplate = (id1, id2) => {
+  let t = global.state.ontology.template
+  return t[id1] || t[id2]
+}
 
 module.exports = CSVPlugin

@@ -2,7 +2,7 @@
 
 const assert = require('assert')
 
-describe('CsvPlugin', () => {
+describe('CSVPlugin', () => {
   const CSVPlugin = require('../index')
 
   it('exists', () => {
