@@ -92,21 +92,19 @@ class CSVPlugin {
 
     let template = loadTemplate(
       this.options.template,
-      data[0].template)
+      data['@graph']?.[0]?.template)
 
     if (this.options.header) {
       ws.write(`${this.header(template)}\n`)
     }
 
-    let xData = await this.expand(data)
+    let graph = (await this.expand(data))['@graph']
 
-    for (let items of xData) {
-      for (let item of items['@graph']) {
-        try {
-          ws.write(`${this.columns(template, item)}\n`)
-        } catch (e) {
-          this.logger.error({ stack: e.stack }, e.message)
-        }
+    for (let item of graph) {
+      try {
+        ws.write(`${this.columns(template, item)}\n`)
+      } catch (e) {
+        this.logger.error({ stack: e.stack }, e.message)
       }
     }
 
