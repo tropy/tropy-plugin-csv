@@ -68,9 +68,13 @@ class CSVPlugin {
       return new ClipboardWriter()
     }
 
-    let path = await this.dialog.save({
-      defaultPath: this.defaultPath
-    })
+    let path = this.options.file
+
+    if (!path) {
+      path = await this.dialog.save({
+        defaultPath: remote.app.getPath('home')
+      })
+    }
 
     if (!path) return null
 
@@ -88,23 +92,26 @@ class CSVPlugin {
     this.logger.trace('Exporting items as CSV...')
 
     let ws = await this.getWriteStream()
-    if (!ws || !data.length) return null
+    if (!ws || !data) return null
 
     let template = loadTemplate(
       this.options.template,
       data['@graph']?.[0]?.template)
 
+    console.log(template)
     if (this.options.header) {
       ws.write(`${this.header(template)}\n`)
     }
 
-    let graph = (await this.expand(data))['@graph']
+    let xData = await this.expand(data)
 
-    for (let item of graph) {
-      try {
-        ws.write(`${this.columns(template, item)}\n`)
-      } catch (e) {
-        this.logger.error({ stack: e.stack }, e.message)
+    for (let g of xData) {
+      for (let item of g['@graph']) {
+        try {
+          ws.write(`${this.columns(template, item)}\n`)
+        } catch (e) {
+          this.logger.error({ stack: e.stack }, e.message)
+        }
       }
     }
 
@@ -115,13 +122,6 @@ class CSVPlugin {
     return this.context.require('../dialog')
   }
 
-  get defaultPath() {
-    return join(
-      remote.app.getPath('home'),
-      this.options.file
-    )
-  }
-
   get logger() {
     return this.context.logger
   }
@@ -129,7 +129,6 @@ class CSVPlugin {
 
 CSVPlugin.defaults = {
   clipboard: false,
-  file: 'tropy.csv',
   header: false,
   notes: false,
   photos: false,

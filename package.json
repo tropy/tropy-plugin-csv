@@ -68,8 +68,8 @@
     },
     {
       "field": "file",
-      "label": "Default file name",
-      "default": "tropy.csv"
+      "type": "save-file",
+      "label": "Save as"
     }
   ],
   "devDependencies": {
