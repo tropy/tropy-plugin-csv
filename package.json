@@ -63,8 +63,8 @@
     {
       "field": "template",
       "label": "Template",
-      "hint": "The id of the Tropy template use. The template determines which fields will be exported. If left empty, the first item's template will be used.",
-      "default": ""
+      "type": "template",
+      "hint": "The id of the Tropy template use. The template determines which fields will be exported. If left empty, the first item's template will be used."
     },
     {
       "field": "file",
@@ -73,7 +73,7 @@
     }
   ],
   "devDependencies": {
-    "electron": "^5.0",
+    "electron": "^8.0",
     "electron-mocha": "^8.1.1"
   }
 }
