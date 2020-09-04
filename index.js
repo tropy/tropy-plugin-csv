@@ -85,7 +85,7 @@ class CSVPlugin {
   }
 
   async expand(data) {
-    return this.context.require('jsonld').expand(data)
+    return this.context.json.expand(data)
   }
 
   async export(data) {
@@ -119,7 +119,7 @@ class CSVPlugin {
   }
 
   get dialog() {
-    return this.context.require('../dialog')
+    return this.context.dialog
   }
 
   get logger() {
