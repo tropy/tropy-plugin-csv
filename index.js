@@ -95,6 +95,7 @@ class CSVPlugin {
     if (!ws || !data) return null
 
     let template = loadTemplate(
+      this.context.window.store?.getState(),
       this.options.template,
       data['@graph']?.[0]?.template)
 
@@ -165,8 +166,8 @@ const list = (item, prop) => {
 const value = (val, sep = ',') =>
     val ? val.map(v => v['@value']).join(sep) : null
 
-const loadTemplate = (id1, id2) => {
-  let t = global.state.ontology.template
+const loadTemplate = (state, id1, id2) => {
+  let t = state.ontology.template
   return t[id1] || t[id2]
 }
 
