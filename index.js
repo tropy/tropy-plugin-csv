@@ -2,7 +2,6 @@
 
 const { createWriteStream } = require('fs')
 const { clipboard, remote } = require('electron')
-const { join } = require('path')
 
 const TROPY = 'https://tropy.org/v1/tropy'
 
@@ -99,7 +98,6 @@ class CSVPlugin {
       this.options.template,
       data['@graph']?.[0]?.template)
 
-    console.log(template)
     if (this.options.header) {
       ws.write(`${this.header(template)}\n`)
     }
@@ -130,8 +128,8 @@ class CSVPlugin {
 
 CSVPlugin.defaults = {
   clipboard: false,
-  header: false,
-  notes: false,
+  header: true,
+  notes: true,
   photos: false,
   quotes: true,
   tags: true,
