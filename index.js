@@ -1,7 +1,8 @@
 'use strict'
 
 const { createWriteStream } = require('fs')
-const { clipboard, remote } = require('electron')
+const { clipboard } = require('electron')
+const { homedir } = require('os')
 
 const TROPY = 'https://tropy.org/v1/tropy'
 
@@ -71,7 +72,7 @@ class CSVPlugin {
 
     if (!path) {
       path = await this.dialog.save({
-        defaultPath: remote.app.getPath('home')
+        defaultPath: homedir()
       })
     }
 
