@@ -9,23 +9,27 @@ describe('Generate csv row for item', () => {
       defaultPhotoTemplate } = require('./fixtures/template')
     const numDefaultItemFields = defaultItemTemplate.fields.length
     const numDefaultPhotoFields = defaultPhotoTemplate.fields.length
-    const { itemSinglePhoto } = require('./fixtures/item')
-    const expectedTags = 'Planets Transcribed'
-    const expectedPath = '/home/caro/Downloads/NYTimes NASA.pdf'
-    const expectedMetadata = ['NYTimes NASA', '2020-08-18T12:59:55.192Z']
-    const expectedNote = 'The Senate paused in its labor debate today.'
-    const expectedItem = [
-      '"Space Agency Bill Is Voted By Senate"',
-      '"Special to the New York Times"',
-      '"1958-06-17"',
-      '"Newspaper"',
-      '"ProQuest Historical Newspapers: The New York Times"',
-      '"The New York Times"',
-      '""', // box, not set
-      '""', // folder, not set
-      '"114560497"',
-      '"Copyright New York Times Company Jun 17, 1958"'
+    const { itemSinglePhoto,
+      itemSinglePhotoExpected } = require('./fixtures/item')
+    const expectedTags = itemSinglePhotoExpected.tags.join(' ')
+    const expectedPath = itemSinglePhotoExpected.photoPath
+    const expectedMetadata = [
+      itemSinglePhotoExpected.photoTitle,
+      itemSinglePhotoExpected.photoDate
     ]
+    const expectedNote = itemSinglePhotoExpected.photoNote
+    const expectedItem = [
+      itemSinglePhotoExpected.title,
+      itemSinglePhotoExpected.creator,
+      itemSinglePhotoExpected.itemDate,
+      itemSinglePhotoExpected.itemType,
+      itemSinglePhotoExpected.source,
+      itemSinglePhotoExpected.collection,
+      itemSinglePhotoExpected.box,
+      itemSinglePhotoExpected.folder,
+      itemSinglePhotoExpected.identifier,
+      itemSinglePhotoExpected.rights
+    ].map(x => `"${x}"`)
 
     describe('with default settings', () => {
       const defaultPlugin = new CSVPlugin({
@@ -207,9 +211,9 @@ describe('Generate csv row for item', () => {
     const { defaultItemTemplate,
       defaultPhotoTemplate } = require('./fixtures/template')
     const numDefaultItemFields = defaultItemTemplate.fields.length
-    const { itemSinglePhotoManyNote } = require('./fixtures/item')
-    const expectedNote1 = "NASA's Voyager mission took advantage of..."
-    const expectedNote2 = 'here’s a second note for this photo'
+    const { itemSinglePhotoManyNote,
+      itemManyNoteExpected } = require('./fixtures/item')
+
     const photoNotesPlugin = new CSVPlugin({
       tags: false,
       photoNotes: true,
@@ -221,12 +225,16 @@ describe('Generate csv row for item', () => {
       defaultPhotoTemplate, itemSinglePhotoManyNote)
 
     it('photo notes column appears immediately after photo path', () => {
-      assert.ok(c[numDefaultItemFields + 1].startsWith(expectedNote1))
+      assert.ok(c[numDefaultItemFields + 1].startsWith(
+        itemManyNoteExpected.firstNote
+      ))
     })
 
     it('all photo notes appear in column', () => {
-      assert.ok(c[numDefaultItemFields + 1].includes(expectedNote1))
-      assert.ok(c[numDefaultItemFields + 1].includes(expectedNote2))
+      assert.ok(c[numDefaultItemFields + 1].includes(
+        itemManyNoteExpected.firstNote))
+      assert.ok(c[numDefaultItemFields + 1].includes(
+        itemManyNoteExpected.secondNote))
     })
   })
 
@@ -255,7 +263,7 @@ describe('Generate csv row for item', () => {
     const { defaultItemTemplate,
       defaultPhotoTemplate } = require('./fixtures/template')
     const numDefaultItemFields = defaultItemTemplate.fields.length
-    const { itemManyPhoto } = require('./fixtures/item')
+    const { itemManyPhoto, itemManyPhotoExpected } = require('./fixtures/item')
     const plugin = new CSVPlugin({
       tags: false,
       photoNotes: true,
@@ -276,11 +284,11 @@ describe('Generate csv row for item', () => {
 
     it('has path of first photo in first column after item data', () => {
       assert.equal(c[numDefaultItemFields],
-        '/home/caro/Downloads/atomic-clock-blue.pdf')
+        itemManyPhotoExpected.firstPhotoPath)
     })
 
     it('has notes of last photo in last column', () => {
-      assert.equal(c.slice(-1), 'One of three free posters.')
+      assert.equal(c.slice(-1), itemManyPhotoExpected.lastPhotoNote)
     })
   })
 })

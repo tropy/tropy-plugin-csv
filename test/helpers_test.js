@@ -3,6 +3,10 @@
 const assert = require('assert')
 const CSVPlugin = require('../index')
 
+function getNoteFromPhotoFixture(photo, idx = 0) {
+  return photo[0]['https://tropy.org/v1/tropy#note'][0]['@list'][idx]['https://tropy.org/v1/tropy#text'][0]['@value']
+}
+
 describe('Encode', () => {
   describe('when quotes option is true', () => {
     const quotesCSV = new CSVPlugin({ quotes: true })
@@ -64,8 +68,8 @@ describe('Get photo notes', () => {
 
   it('returns the note when a photo has a single note', () => {
     const extractedNote = plugin.getNotes(singlePhotoSingleNote[0])
-    assert.equal(extractedNote, 'The Senate paused in its labor debate today.'
-    )
+    assert.equal(extractedNote,
+      getNoteFromPhotoFixture(singlePhotoSingleNote, 0))
   })
 
   it('returns the text, not the markup, of a note', () => {
@@ -75,8 +79,8 @@ describe('Get photo notes', () => {
 
   it('concatenates the text of multiple notes using a separator', () => {
     const extractedNote = plugin.getNotes(singlePhotoManyNote[0])
-    const firstNoteText = 'NASA\'s Voyager mission took advantage of...'
-    const secondNoteText = 'here’s a second note for this photo'
+    const firstNoteText = getNoteFromPhotoFixture(singlePhotoManyNote, 0)
+    const secondNoteText = getNoteFromPhotoFixture(singlePhotoManyNote, 1)
     const sep = '---'
     assert.ok(extractedNote.includes(sep))
     assert.ok(extractedNote.includes(firstNoteText))
@@ -90,8 +94,10 @@ describe('Get photo path', () => {
   const { singlePhotoNoNote } = require('./fixtures/photo')
 
   it('extracts the value from the #path key of a photo', () => {
+    const expectedPath =
+      singlePhotoNoNote[0]['https://tropy.org/v1/tropy#path'][0]['@value']
     assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]),
-      '/home/caro/Downloads/ChapelHillWeekly.pdf')
+      expectedPath)
   })
 
   it('returns empty string if no value for path key', () => {

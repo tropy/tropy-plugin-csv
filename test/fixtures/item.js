@@ -2,23 +2,40 @@ const { singlePhotoSingleNote,
   singlePhotoManyNote,
   manyPhoto } = require('./photo')
 
+const itemSinglePhotoExpected = {
+  title: 'Space Agency Bill Is Voted By Senate',
+  creator: 'Special to the New York Times',
+  itemDate: '1958-06-17',
+  itemType: 'Newspaper',
+  source: 'ProQuest Historical Newspapers: The New York Times',
+  collection: 'The New York Times',
+  box: '',
+  folder: '',
+  identifier: '114560497',
+  rights: 'Copyright New York Times Company Jun 17, 1958',
+  photoPath: singlePhotoSingleNote[0]['https://tropy.org/v1/tropy#path'][0]['@value'],
+  photoTitle: singlePhotoSingleNote[0]['http://purl.org/dc/elements/1.1/title'][0]['@value'],
+  photoDate: singlePhotoSingleNote[0]['http://purl.org/dc/elements/1.1/date'][0]['@value'],
+  photoNote: singlePhotoSingleNote[0]['https://tropy.org/v1/tropy#note'][0]['@list'][0]['https://tropy.org/v1/tropy#text'][0]['@value'],
+  tags: ['Planets', 'Transcribed']
+}
 
+const itemManyNoteExpected = {
+  firstNote: singlePhotoManyNote[0]['https://tropy.org/v1/tropy#note'][0]['@list'][0]['https://tropy.org/v1/tropy#text'][0]['@value'],
+  secondNote: singlePhotoManyNote[0]['https://tropy.org/v1/tropy#note'][0]['@list'][1]['https://tropy.org/v1/tropy#text'][0]['@value']
+
+}
+
+const itemManyPhotoExpected = {
+  firstPhotoPath: manyPhoto[0]['https://tropy.org/v1/tropy#path'][0]['@value'],
+  lastPhotoNote: manyPhoto[2]['https://tropy.org/v1/tropy#note'][0]['@list'][0]['https://tropy.org/v1/tropy#text'][0]['@value']
+
+}
 module.exports = {
-  minimalItem: {
-    '@type': [
-      'https://tropy.org/v1/tropy#Item'
-    ],
-    'https://tropy.org/v1/tropy#template': [
-      {
-        '@id': 'https://tropy.org/v1/templates/generic'
-      }
-    ],
-    'http://purl.org/dc/elements/1.1/title': [
-      {
-        '@value': 'An item with no data'
-      }
-    ]
-  }, itemSinglePhoto: {
+  itemSinglePhotoExpected,
+  itemManyPhotoExpected,
+  itemManyNoteExpected,
+  itemSinglePhoto: {
     '@type': [
       'https://tropy.org/v1/tropy#Item'
     ],
@@ -29,18 +46,18 @@ module.exports = {
     ],
     'https://tropy.org/v1/tropy#collection': [
       {
-        '@value': 'The New York Times'
+        '@value': itemSinglePhotoExpected.collection
       }
     ],
     'http://purl.org/dc/elements/1.1/creator': [
       {
-        '@value': 'Special to the New York Times'
+        '@value': itemSinglePhotoExpected.creator
       }
     ],
     'http://purl.org/dc/elements/1.1/date': [
       {
         '@type': 'https://tropy.org/v1/tropy#date',
-        '@value': '1958-06-17'
+        '@value': itemSinglePhotoExpected.itemDate
       }
     ],
     'http://purl.org/dc/terms/identifier': [
@@ -55,7 +72,7 @@ module.exports = {
     ],
     'http://purl.org/dc/elements/1.1/identifier': [
       {
-        '@value': '114560497'
+        '@value': itemSinglePhotoExpected.identifier
       }
     ],
     'https://tropy.org/v1/tropy#list': [
@@ -75,20 +92,20 @@ module.exports = {
     ],
     'http://purl.org/dc/elements/1.1/rights': [
       {
-        '@value': 'Copyright New York Times Company Jun 17, 1958'
+        '@value': itemSinglePhotoExpected.rights
       }
     ],
     'http://purl.org/dc/elements/1.1/source': [
       {
-        '@value': 'ProQuest Historical Newspapers: The New York Times'
+        '@value': itemSinglePhotoExpected.source
       }
     ],
     'https://tropy.org/v1/tropy#tag': [
       {
-        '@value': 'Planets'
+        '@value': itemSinglePhotoExpected.tags[0]
       },
       {
-        '@value': 'Transcribed'
+        '@value': itemSinglePhotoExpected.tags[1]
       }
     ],
     'https://tropy.org/v1/tropy#template': [
@@ -98,12 +115,12 @@ module.exports = {
     ],
     'http://purl.org/dc/elements/1.1/title': [
       {
-        '@value': 'Space Agency Bill Is Voted By Senate'
+        '@value': itemSinglePhotoExpected.title
       }
     ],
     'http://purl.org/dc/elements/1.1/type': [
       {
-        '@value': 'Newspaper'
+        '@value': itemSinglePhotoExpected.itemType
       }
     ]
   }, itemNoPhoto: {
