@@ -38,7 +38,7 @@ class CSVPlugin {
   }
 
   getPhotoPath(photo) {
-    return value(photo[`${TROPY}#path`])
+    return value(photo[`${TROPY}#path`]) || ''
   }
 
   getNotes(photo, sep = ' --- ') {

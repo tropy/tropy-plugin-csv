@@ -95,15 +95,13 @@ describe('Get photo path', () => {
   })
 
   it('returns empty string if no value for path key', () => {
-    // TODO is this a possible state?
     delete singlePhotoNoNote[0]['https://tropy.org/v1/tropy#path'][0]['@value']
     assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]), '')
 
   })
-  it('returns null if no path key present', () => {
-    // TODO is this the desired behaviour or should this error?
+  it('returns empty string if no path key present', () => {
     delete singlePhotoNoNote[0]['https://tropy.org/v1/tropy#path']
-    assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]), null)
+    assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]), '')
   })
 })
 
