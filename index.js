@@ -12,55 +12,71 @@ class CSVPlugin {
     this.context = context
   }
 
-  columns(template, item) {
-    let c = template.fields.map(f =>
+  columns(itemTemplate, photoTemplate, item) {
+    let c = itemTemplate.fields.map(f =>
       this.encode(value(item[f.property])))
 
     if (this.options.tags)
       c.push(this.encode(value(item[`${TROPY}#tag`], ', ')))
 
-    if (this.options.photos)
-      c.push(this.encode(this.getPhotoPaths(item)))
-
-    if (this.options.notes)
-      c.push(this.encode(this.getPhotoNotes(item)))
-
-    return c.join(',')
+    if (this.options.photoNotes || this.options.photoMetadata) {
+      const allPhotos = list(item, `${TROPY}#photo`)
+      for (const photo of allPhotos) {
+        c.push(this.encode(this.getPhotoPath(photo)))
+        if (this.options.photoMetadata)
+          c.push(...photoTemplate.fields.map(
+            f => this.encode(value(photo[f.property]))
+          ))
+        if (this.options.photoNotes)
+          c.push(this.encode(this.getNotes(photo)))
+      }
+    } return c
   }
 
-  getPhotoPaths(item, sep = ';') {
-    return list(item, `${TROPY}#photo`)
-      .map(x => value(x[`${TROPY}#path`]))
-      .join(sep)
+  columnsString(itemTemplate, photoTemplate, item) {
+    return this.columns(itemTemplate, photoTemplate, item).join(',')
   }
 
-  getPhotoNotes(item, sep = '\n---\n') {
-    return list(item, `${TROPY}#photo`)
-      .flatMap(x => this.getNotes(x, sep))
-      .filter(x => x != null && x.length > 0)
-      .join(sep)
+  getPhotoPath(photo) {
+    return value(photo[`${TROPY}#path`]) || ''
   }
 
-  getNotes(photo, sep) {
+  getNotes(photo, sep = ' --- ') {
     return list(photo, `${TROPY}#note`)
       .map(x => value(x[`${TROPY}#text`]))
       .join(sep)
   }
 
-  header(template) {
-    let h = template.fields.map(f => this.encode(f.property))
+  header(itemTemplate, photoTemplate = null, maxPhotos = 1) {
+    let h = itemTemplate.fields.map(f => this.encode(f.property))
+    if (this.options.tags) h.push(`${TROPY}#tag`)
 
-    if (this.options.tags) h.push('Tags')
-    if (this.options.photos) h.push('Photos')
-    if (this.options.notes) h.push('Notes')
+    if (this.options.photoNotes || this.options.photoMetadata) {
+      let photoHeaders = [`${TROPY}#path`]
+      if (this.options.photoMetadata && photoTemplate) {
+        photoHeaders.push(
+          ...photoTemplate.fields.map(f => this.encode(f.property)))
+      }
+      if (this.options.photoNotes) { photoHeaders.push(`${TROPY}#note`) }
 
-    return h.join(',')
+      [...Array(maxPhotos)].forEach(() => {
+        h.push(...photoHeaders)
+      })
+    }
+
+    return h
   }
 
+  headerString(itemTemplate, photoTemplate = null, maxPhotos = 1) {
+    return this.header(itemTemplate, photoTemplate, maxPhotos).join(',')
+  }
+
+  // TODO this isn't really RFC-4180 compliant
+  // and probably has some unhandled edge cases
   encode(string) {
     return this.options.quotes ?
-      `"${string == null ? '' : string.replace(/"+/, '""')}"` :
-      `${string == null ? '' : string.replace(/,/, '')}`
+      `"${string == null ? '' : string.replaceAll(/"+/g, '""')}"` :
+      `${string == null ? '' : string.replaceAll(/[,\n\r]/g, '')}`
   }
 
   async getWriteStream() {
@@ -88,27 +104,56 @@ class CSVPlugin {
     return this.context.json.expand(data)
   }
 
+  loadExportTemplates(data) {
+    const state = this.context.window.store?.getState()
+    const inferredItemTemplate = data['@graph']?.[0]?.template
+    const itemTemplate = loadTemplate(
+      state,
+      this.options.itemTemplate,
+      inferredItemTemplate)
+
+    if (!itemTemplate)
+      throw new Error(
+        `Failed to find specified item template "${this.options.itemTemplate}" or fallback "${data['@graph']?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
+      )
+
+
+    const inferredPhotoTemplate = data['@graph']?.[0]?.photo?.[0]?.template
+    const photoTemplate = this.options.photoMetadata ? loadTemplate(
+      state,
+      this.options.photoTemplate,
+      inferredPhotoTemplate) : null
+
+    if (this.options.photoMetadata && !photoTemplate)
+      throw new Error(
+        `Failed to find specified photo template "${this.options.photoTemplate}" or fallback "${data['@graph']?.[0]?.photo?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
+      )
+
+    return { itemTemplate, photoTemplate }
+  }
+
+  maxPhotos(data) {
+    return (this.options.photoMetadata || this.options.photoNotes) ?
+      Math.max(...data['@graph'].map(item => item.photo?.length || 0)) : 0
+  }
+
   async export(data) {
     this.logger.trace('Exporting items as CSV...')
 
     let ws = await this.getWriteStream()
     if (!ws || !data) return null
 
-    let template = loadTemplate(
-      this.context.window.store?.getState(),
-      this.options.template,
-      data['@graph']?.[0]?.template)
+    const { itemTemplate, photoTemplate } = this.loadExportTemplates(data)
 
-    if (this.options.header) {
-      ws.write(`${this.header(template)}\n`)
-    }
+    ws.write(`${this.headerString(itemTemplate, photoTemplate,
+      this.maxPhotos(data))}\n`)
 
     let xData = await this.expand(data)
 
     for (let g of xData) {
       for (let item of g['@graph']) {
         try {
-          ws.write(`${this.columns(template, item)}\n`)
+          ws.write(`${this.columnsString(itemTemplate, photoTemplate, item)}\n`)
         } catch (e) {
           this.logger.error({ stack: e.stack }, e.message)
         }
@@ -116,6 +161,11 @@ class CSVPlugin {
     }
 
     ws.end()
+  }
+
+  async import() {
+    this.logger.warn('CSV import not implemented yet.')
+    console.warn('CSV import not implemented yet.')
   }
 
   get dialog() {
@@ -129,12 +179,12 @@ class CSVPlugin {
 
 CSVPlugin.defaults = {
   clipboard: false,
-  header: true,
-  notes: true,
-  photos: false,
+  photoNotes: true,
+  photoMetadata: false,
   quotes: true,
   tags: true,
-  template: '',
+  itemTemplate: '',
+  photoTemplate: ''
 }
 
 
