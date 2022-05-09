@@ -32,14 +32,20 @@
       "default": true
     },
     {
-      "field": "photos",
-      "label": "Include photos?",
+      "field": "photoMetadata",
+      "label": "Include photo metadata?",
       "type": "boolean",
       "default": false
     },
     {
-      "field": "notes",
-      "label": "Include notes?",
+      "field": "photoTemplate",
+      "label": "Photo  Template",
+      "type": "template",
+      "hint": "The id of the Tropy template to use for photos. The template determines which fields will be exported. If left empty, the template for the first item's first photo will be used."
+    },
+    {
+      "field": "photoNotes",
+      "label": "Include photo notes?",
       "type": "boolean",
       "default": true
     },
@@ -50,22 +56,16 @@
       "default": true
     },
     {
-      "field": "header",
-      "label": "Print CSV header line?",
-      "type": "boolean",
-      "default": true
-    },
-    {
       "field": "clipboard",
       "label": "Copy to clipboard?",
       "type": "boolean",
       "default": false
     },
     {
-      "field": "template",
-      "label": "Template",
+      "field": "itemTemplate",
+      "label": "Item Template",
       "type": "template",
-      "hint": "The id of the Tropy template use. The template determines which fields will be exported. If left empty, the first item's template will be used."
+      "hint": "The id of the Tropy template to use for items. The template determines which fields will be exported. If left empty, the first item's template will be used."
     },
     {
       "field": "file",
