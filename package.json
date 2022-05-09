@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/inukshuk/tropy-plugin-csv#readme",
   "hooks": {
-    "export": true
+    "export": true,
+    "import": true
   },
   "options": [
     {

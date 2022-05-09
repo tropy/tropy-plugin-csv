@@ -118,6 +118,11 @@ class CSVPlugin {
     ws.end()
   }
 
+  async import() {
+    this.logger.warn('CSV import not implemented yet.')
+    console.warn('CSV import not implemented yet.')
+  }
+
   get dialog() {
     return this.context.dialog
   }
