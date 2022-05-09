@@ -101,13 +101,15 @@ describe('Get photo path', () => {
   })
 
   it('returns empty string if no value for path key', () => {
-    delete singlePhotoNoNote[0]['https://tropy.org/v1/tropy#path'][0]['@value']
-    assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]), '')
-
+    const fixtureCopy = JSON.parse(JSON.stringify(singlePhotoNoNote))[0]
+    delete fixtureCopy['https://tropy.org/v1/tropy#path'][0]['@value']
+    assert.equal(plugin.getPhotoPath(fixtureCopy), '')
   })
   it('returns empty string if no path key present', () => {
-    delete singlePhotoNoNote[0]['https://tropy.org/v1/tropy#path']
-    assert.equal(plugin.getPhotoPath(singlePhotoNoNote[0]), '')
+    const fixtureCopy = JSON.parse(JSON.stringify(singlePhotoNoNote))[0]
+    delete fixtureCopy['https://tropy.org/v1/tropy#path']
+    assert.equal(plugin.getPhotoPath(fixtureCopy), '')
+
   })
 })
 
