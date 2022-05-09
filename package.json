@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inukshuk/tropy-plugin-csv.git"
+    "url": "git+https://github.com/tropy/tropy-plugin-csv.git"
   },
   "keywords": [
     "tropy",
@@ -18,9 +18,9 @@
   "author": "Sylvester Keil <sylvester@keil.or.at>",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/inukshuk/tropy-plugin-csv/issues"
+    "url": "https://github.com/tropy/tropy-plugin-csv/issues"
   },
-  "homepage": "https://github.com/inukshuk/tropy-plugin-csv#readme",
+  "homepage": "https://github.com/tropy/tropy-plugin-csv#readme",
   "hooks": {
     "export": true,
     "import": true
