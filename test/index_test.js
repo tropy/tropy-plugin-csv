@@ -12,4 +12,7 @@ describe('CSVPlugin', () => {
   it('responds to export hook', () => {
     assert.equal(typeof (new CSVPlugin).export, 'function')
   })
+  it('responds to import hook', () => {
+    assert.equal(typeof (new CSVPlugin).import, 'function')
+  })
 })
