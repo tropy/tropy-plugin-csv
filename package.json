@@ -4,11 +4,12 @@
   "description": "Tropy to CSV Export Plugin",
   "main": "index.js",
   "scripts": {
-    "test": "electron-mocha --renderer test"
+    "test": "electron-mocha --renderer test",
+    "lint": "eslint --color index.js test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inukshuk/tropy-plugin-csv.git"
+    "url": "git+https://github.com/tropy/tropy-plugin-csv.git"
   },
   "keywords": [
     "tropy",
@@ -17,9 +18,9 @@
   "author": "Sylvester Keil <sylvester@keil.or.at>",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/inukshuk/tropy-plugin-csv/issues"
+    "url": "https://github.com/tropy/tropy-plugin-csv/issues"
   },
-  "homepage": "https://github.com/inukshuk/tropy-plugin-csv#readme",
+  "homepage": "https://github.com/tropy/tropy-plugin-csv#readme",
   "hooks": {
     "export": true,
     "import": true
@@ -75,6 +76,7 @@
   ],
   "devDependencies": {
     "electron": "^10.1.1",
-    "electron-mocha": "^9.1.0"
+    "electron-mocha": "^9.1.0",
+    "eslint": "^8.14.0"
   }
 }
