@@ -113,8 +113,9 @@ class CSVPlugin {
       inferredItemTemplate)
 
     if (!itemTemplate)
-      // eslint-disable-next-line max-len
-      throw new Error(`Failed to find specified item template "${this.options.itemTemplate}" or fallback "${data['@graph']?.[0]?.template}". Please install one of these templates, or select a different template and try again.`)
+      throw new Error(
+        `Failed to find specified item template "${this.options.itemTemplate}" or fallback "${data['@graph']?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
+      )
 
 
     const inferredPhotoTemplate = data['@graph']?.[0]?.photo?.[0]?.template
@@ -124,8 +125,9 @@ class CSVPlugin {
       inferredPhotoTemplate) : null
 
     if (this.options.photoMetadata && !photoTemplate)
-      // eslint-disable-next-line max-len
-      throw new Error(`Failed to find specified photo template "${this.options.photoTemplate}" or fallback "${data['@graph']?.[0]?.photo?.[0]?.template}". Please install one of these templates, or select a different template and try again.`)
+      throw new Error(
+        `Failed to find specified photo template "${this.options.photoTemplate}" or fallback "${data['@graph']?.[0]?.photo?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
+      )
 
     return { itemTemplate, photoTemplate }
   }
