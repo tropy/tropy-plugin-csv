@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const CSVPlugin = require('../index')
+const CSVPlugin = require('../src/plugin')
 
 describe('Generate csv row for item', () => {
   describe('with single photo', () => {

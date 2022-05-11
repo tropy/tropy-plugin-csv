@@ -3,7 +3,7 @@
 const assert = require('assert')
 
 describe('CSVPlugin', () => {
-  const CSVPlugin = require('../index')
+  const CSVPlugin = require('../src/plugin')
 
   it('exists', () => {
     assert.equal(typeof CSVPlugin, 'function')

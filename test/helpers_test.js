@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const CSVPlugin = require('../index')
+const CSVPlugin = require('../src/plugin')
 
 function getNoteFromPhotoFixture(photo, idx = 0) {
   return photo[0]['https://tropy.org/v1/tropy#note'][0]['@list'][idx]['https://tropy.org/v1/tropy#text'][0]['@value']
