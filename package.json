@@ -75,8 +75,11 @@
     }
   ],
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "electron": "^10.1.1",
     "electron-mocha": "^9.1.0",
-    "eslint": "^8.14.0"
+    "eslint": "^8.14.0",
+    "rollup": "^2.72.1"
   }
 }
