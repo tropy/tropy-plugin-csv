@@ -1,7 +1,7 @@
 {
   "name": "tropy-plugin-csv",
   "version": "2.1.0",
-  "description": "Tropy to CSV Export Plugin",
+  "description": "Tropy Plugin for importing from and exporting to CSV files.",
   "main": "index.js",
   "scripts": {
     "test": "electron-mocha --renderer test",
@@ -28,51 +28,53 @@
   },
   "options": [
     {
+      "field": "itemTemplate",
+      "label": "Item Template",
+      "placeholder": "Select Template (Optional)",
+      "type": "template",
+      "hint": "The id of the Tropy template to use for items. For export, the template determines which fields will be exported. If left empty, the first item's template will be used. For import, the selected template will be applied to imported items."
+    },
+    {
+      "field": "photoTemplate",
+      "label": "Photo Template",
+      "placeholder": "Select Template (Optional)",
+      "type": "template",
+      "hint": "The id of the Tropy template to use for photos. The template determines which fields will be exported. If left empty, the template for the first item's first photo will be used. For import, the selected template will be applied to imported photos."
+    },
+    {
       "field": "tags",
-      "label": "Include tags?",
+      "label": "Export tags?",
       "type": "boolean",
       "default": true
     },
     {
       "field": "photoMetadata",
-      "label": "Include photo metadata?",
+      "label": "Export photo metadata?",
       "type": "boolean",
       "default": false
     },
     {
-      "field": "photoTemplate",
-      "label": "Photo  Template",
-      "type": "template",
-      "hint": "The id of the Tropy template to use for photos. The template determines which fields will be exported. If left empty, the template for the first item's first photo will be used."
-    },
-    {
       "field": "photoNotes",
-      "label": "Include photo notes?",
+      "label": "Export photo notes?",
       "type": "boolean",
       "default": true
     },
     {
       "field": "quotes",
-      "label": "Wrap values with quotes?",
+      "label": "Wrap all values with quotes in export?",
       "type": "boolean",
       "default": true
     },
     {
       "field": "clipboard",
-      "label": "Copy to clipboard?",
+      "label": "Copy exported data to clipboard?",
       "type": "boolean",
       "default": false
     },
     {
-      "field": "itemTemplate",
-      "label": "Item Template",
-      "type": "template",
-      "hint": "The id of the Tropy template to use for items. The template determines which fields will be exported. If left empty, the first item's template will be used."
-    },
-    {
       "field": "file",
       "type": "save-file",
-      "label": "Save as"
+      "label": "Save export as"
     }
   ],
   "devDependencies": {

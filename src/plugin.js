@@ -1,11 +1,14 @@
 'use strict'
 
 const { createWriteStream } = require('fs')
+const { readFile } = require('fs/promises')
 const { clipboard } = require('electron')
 const { homedir } = require('os')
 const { stringify } = require('csv-stringify/sync')
+const { parse } = require('csv-parse/sync')
+const { list, value, loadTemplate, getPhotoPath, getNotes, TROPY,
+  addTemplateKey, splitArrayIntoChunks, createValue } = require('./helpers')
 
-const TROPY = 'https://tropy.org/v1/tropy'
 
 class CSVPlugin {
   constructor(options, context) {
@@ -92,8 +95,8 @@ class CSVPlugin {
       quoted: this.options.quotes,
       quoted_empty: this.options.quotes,
       quoted_string: this.options.quotes
-      })
-    }
+    })
+  }
 
   loadExportTemplates(data) {
     const state = this.context.window.store?.getState()
@@ -147,13 +150,91 @@ class CSVPlugin {
         }
       }
     }
-
     ws.end()
   }
 
-  async import() {
-    this.logger.warn('CSV import not implemented yet.')
-    console.warn('CSV import not implemented yet.')
+  findUnknownHeaders(headerRow) {
+    const knownProperties = Object.keys(
+      this.context.window.store?.getState().ontology.props)
+    return headerRow.filter(h => !knownProperties.includes(h))
+  }
+
+  parseHeaders(csvHeaderRow) {
+    const firstPhotoHeaderIdx = csvHeaderRow.indexOf(`${TROPY}#path`)
+    if (firstPhotoHeaderIdx > 0) {
+      const nextPhotoHeaderIdx = csvHeaderRow.indexOf(
+        `${TROPY}#path`, firstPhotoHeaderIdx + 1)
+      const itemHeaders = csvHeaderRow.slice(0, firstPhotoHeaderIdx)
+      const photoHeaders = csvHeaderRow.slice(firstPhotoHeaderIdx,
+        (nextPhotoHeaderIdx > 0) ? nextPhotoHeaderIdx : csvHeaderRow.length)
+      return { itemHeaders, photoHeaders }
+    }
+    return { itemHeaders: csvHeaderRow } // no photo information present in csv
+  }
+
+  parseRow(row, itemKeys, photoKeys) {
+    // ignore comment rows
+    if (row[0].startsWith('#')) return
+
+    const itemData = [...row.slice(0, itemKeys.length)]
+    let item = Object.assign(...itemData.map(
+      (v, idx) => createValue(itemKeys[idx], v)
+    ))
+    item = addTemplateKey(item, this.options.itemTemplate)
+
+    if (photoKeys) {
+      const photos = splitArrayIntoChunks(
+        row.slice(itemKeys.length), photoKeys.length
+      )
+      item.photo = []
+
+      for (let p of photos) {
+        let photoData = Object.assign(...p.map(
+          (v, idx) => createValue(photoKeys[idx], v)
+        ))
+        item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
+      }
+    }
+    return item
+  }
+
+  async import(payload) {
+    this.logger.trace('importing items from CSV...')
+    let { files } = payload
+    if (!files)
+      files = await this.dialog.open({
+        filters: [{ name: 'CSV file', extensions: ['csv'] }],
+        properties: ['openFile', 'multiSelections']
+      })
+    if (!files) return
+
+    payload.data = []
+
+    for (const file of files) {
+      try {
+        const csvRows = parse(
+          await readFile(file),
+          { relaxColumnCount: true }
+        )
+
+        const headerRow = csvRows[0]
+        const invalidHeaders = this.findUnknownHeaders(headerRow)
+        if (invalidHeaders.length) {
+          this.dialog.fail(new Error(
+            `Ensure all headers are valid metadata property IDs. Unknown properties:\n  ${invalidHeaders.join(',\n  ')}`
+          ))
+          return
+        }
+        const { itemHeaders, photoHeaders } = this.parseHeaders(headerRow)
+
+        for (let row of csvRows.slice(1)) {
+          payload.data.push(this.parseRow(row, itemHeaders, photoHeaders))
+        }
+      } catch (e) {
+        this.dialog.fail(e)
+        this.logger.warn('failed to import from CSV', file, e)
+      }
+    }
   }
 
   get dialog() {
@@ -175,7 +256,6 @@ CSVPlugin.defaults = {
   photoTemplate: ''
 }
 
-
 class ClipboardWriter {
   constructor() {
     this.buffer = []
@@ -192,20 +272,5 @@ class ClipboardWriter {
   }
 }
 
-const list = (item, prop) => {
-  try {
-    return item[prop][0]['@list']
-  } catch (_) {
-    return []
-  }
-}
-
-const value = (val, sep = ',') =>
-    val ? val.map(v => v['@value']).join(sep) : null
-
-const loadTemplate = (state, id1, id2) => {
-  let t = state.ontology.template
-  return t[id1] || t[id2]
-}
 
 module.exports = CSVPlugin
