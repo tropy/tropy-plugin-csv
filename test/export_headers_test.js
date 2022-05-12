@@ -28,7 +28,7 @@ describe('Generate header', () => {
     })
 
     it('Generates column headers to match properties of item template', () => {
-      const itemFields = defaultItemTemplate.fields.map(x => `"${x.property}"`)
+      const itemFields = defaultItemTemplate.fields.map(x => x.property)
       assert.deepEqual(h.slice(0, numDefaultItemFields), itemFields)
     })
 
@@ -45,6 +45,29 @@ describe('Generate header', () => {
     it('first header after item template fields is tags', () => {
       const h = tagsPlugin.header(defaultItemTemplate, defaultPhotoTemplate)
       assert.equal(h[numDefaultItemFields], 'https://tropy.org/v1/tropy#tag')
+    })
+  })
+
+  describe('when quotes is true', () => {
+    const quotesPlugin = new CSVPlugin({
+      quotes: true,
+      itemTemplate: ''
+    })
+    it('Header fields are quoted', () => {
+      const h = quotesPlugin.headerString(
+        defaultItemTemplate, defaultPhotoTemplate)
+      assert.ok(h.includes('"'))
+    })
+  })
+  describe('when quotes is false', () => {
+    const noQuotesPlugin = new CSVPlugin({
+      quotes: false,
+      itemTemplate: ''
+    })
+    it('Header fields are not quoted', () => {
+      const h = noQuotesPlugin.headerString(
+        defaultItemTemplate, defaultPhotoTemplate)
+      assert.ok(!h.includes('"'))
     })
   })
 
@@ -68,7 +91,7 @@ describe('Generate header', () => {
         itemTemplate: ''
       })
       const h = noPhotosPlugin.header(defaultItemTemplate, defaultPhotoTemplate)
-      const itemFields = defaultItemTemplate.fields.map(x => `"${x.property}"`)
+      const itemFields = defaultItemTemplate.fields.map(x => x.property)
       assert.deepEqual(h, itemFields)
     })
 
@@ -81,7 +104,7 @@ describe('Generate header', () => {
         photoTemplate: defaultPhotoTemplate
       })
       const h = noPhotosPlugin.header(defaultItemTemplate, defaultPhotoTemplate)
-      const itemFields = defaultItemTemplate.fields.map(x => `"${x.property}"`)
+      const itemFields = defaultItemTemplate.fields.map(x => x.property)
       assert.deepEqual(h, itemFields)
     })
   })
@@ -119,7 +142,7 @@ describe('Generate header', () => {
 
     it('photo metadata fields appear immediately after path in header', () => {
       const photoFields = defaultPhotoTemplate.fields
-        .map(x => `"${x.property}"`)
+        .map(x => x.property)
       assert.deepEqual(h.slice(numDefaultItemFields + 1), photoFields)
     })
 
@@ -143,7 +166,7 @@ describe('Generate header', () => {
 
     it('photo metadata fields appear immediately after path in header', () => {
       const photoFields = defaultPhotoTemplate.fields
-        .map(x => `"${x.property}"`)
+        .map(x => x.property)
       assert.deepEqual(h.slice(numDefaultItemFields + 1, -1), photoFields)
     })
 
@@ -152,3 +175,18 @@ describe('Generate header', () => {
     })
   })
 })
+
+
+describe('Get maximum number of photos in item', () => {
+  const { data } = require('./fixtures/data')
+
+  it('returns 0 if no photo output required', () => {
+    const plugin = new CSVPlugin({ photoNotes: false, photoMeta: false })
+    assert.equal(plugin.maxPhotos(data), 0)
+  })
+  it('returns the max number of photos in an item', () => {
+    const plugin = new CSVPlugin({ photoNotes: true, photoMeta: false })
+    assert.equal(plugin.maxPhotos(data), 4)
+  })
+})
+
