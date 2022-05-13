@@ -80,13 +80,13 @@ module.exports = {
               'https://tropy.org/v1/tropy#html': [
                 {
                   '@language': 'en',
-                  '@value': '<p>The Senate paused in its labor debate today.</p>'
+                  '@value': '<p>The Senate paused, in its labor debate today.</p>'
                 }
               ],
               'https://tropy.org/v1/tropy#text': [
                 {
                   '@language': 'en',
-                  '@value': 'The Senate paused in its labor debate today.'
+                  '@value': 'The Senate paused, in its labor debate today.'
                 }
               ]
             }

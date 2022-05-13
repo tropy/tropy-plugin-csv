@@ -1,82 +1,19 @@
 'use strict'
 
 const { createWriteStream } = require('fs')
+const { readFile } = require('fs/promises')
 const { clipboard } = require('electron')
 const { homedir } = require('os')
+const { stringify } = require('csv-stringify/sync')
+const { parse } = require('csv-parse/sync')
+const { list, value, loadTemplate, getPhotoPath, getNotes, TROPY,
+  addTemplateKey, splitArrayIntoChunks, createValue } = require('./helpers')
 
-const TROPY = 'https://tropy.org/v1/tropy'
 
 class CSVPlugin {
   constructor(options, context) {
     this.options = Object.assign({}, CSVPlugin.defaults, options)
     this.context = context
-  }
-
-  columns(itemTemplate, photoTemplate, item) {
-    let c = itemTemplate.fields.map(f =>
-      this.encode(value(item[f.property])))
-
-    if (this.options.tags)
-      c.push(this.encode(value(item[`${TROPY}#tag`], ', ')))
-
-    if (this.options.photoNotes || this.options.photoMetadata) {
-      const allPhotos = list(item, `${TROPY}#photo`)
-      for (const photo of allPhotos) {
-        c.push(this.encode(this.getPhotoPath(photo)))
-        if (this.options.photoMetadata)
-          c.push(...photoTemplate.fields.map(
-            f => this.encode(value(photo[f.property]))
-          ))
-        if (this.options.photoNotes)
-          c.push(this.encode(this.getNotes(photo)))
-      }
-    } return c
-  }
-
-  columnsString(itemTemplate, photoTemplate, item) {
-    return this.columns(itemTemplate, photoTemplate, item).join(',')
-  }
-
-  getPhotoPath(photo) {
-    return value(photo[`${TROPY}#path`]) || ''
-  }
-
-  getNotes(photo, sep = ' --- ') {
-    return list(photo, `${TROPY}#note`)
-      .map(x => value(x[`${TROPY}#text`]))
-      .join(sep)
-  }
-
-  header(itemTemplate, photoTemplate = null, maxPhotos = 1) {
-    let h = itemTemplate.fields.map(f => this.encode(f.property))
-    if (this.options.tags) h.push(`${TROPY}#tag`)
-
-    if (this.options.photoNotes || this.options.photoMetadata) {
-      let photoHeaders = [`${TROPY}#path`]
-      if (this.options.photoMetadata && photoTemplate) {
-        photoHeaders.push(
-          ...photoTemplate.fields.map(f => this.encode(f.property)))
-      }
-      if (this.options.photoNotes) { photoHeaders.push(`${TROPY}#note`) }
-
-      [...Array(maxPhotos)].forEach(() => {
-        h.push(...photoHeaders)
-      })
-    }
-
-    return h
-  }
-
-  headerString(itemTemplate, photoTemplate = null, maxPhotos = 1) {
-    return this.header(itemTemplate, photoTemplate, maxPhotos).join(',')
-  }
-
-  // TODO this isn't really RFC-4180 compliant
-  // and probably has some unhandled edge cases
-  encode(string) {
-    return this.options.quotes ?
-      `"${string == null ? '' : string.replaceAll(/"+/g, '""')}"` :
-      `${string == null ? '' : string.replaceAll(/[,\n\r]/g, '')}`
   }
 
   async getWriteStream() {
@@ -104,6 +41,63 @@ class CSVPlugin {
     return this.context.json.expand(data)
   }
 
+  columns(itemTemplate, photoTemplate, item) {
+    let c = itemTemplate.fields.map(f =>
+      value(item[f.property]))
+
+    if (this.options.tags)
+      c.push(value(item[`${TROPY}#tag`], ', '))
+
+    if (this.options.photoNotes || this.options.photoMetadata) {
+      const allPhotos = list(item, `${TROPY}#photo`)
+      for (const photo of allPhotos) {
+        c.push(getPhotoPath(photo))
+        if (this.options.photoMetadata)
+          c.push(...photoTemplate.fields.map(
+            f => value(photo[f.property])
+          ))
+        if (this.options.photoNotes)
+          c.push(getNotes(photo))
+      }
+    } return c
+  }
+
+  columnsString(itemTemplate, photoTemplate, item) {
+    return stringify([this.columns(itemTemplate, photoTemplate, item)], {
+      quoted: this.options.quotes,
+      quoted_empty: this.options.quotes,
+      quoted_string: this.options.quotes
+    })
+  }
+
+  header(itemTemplate, photoTemplate = null, maxPhotos = 1) {
+    let h = itemTemplate.fields.map(f => f.property)
+    if (this.options.tags) h.push(`${TROPY}#tag`)
+
+    if (this.options.photoNotes || this.options.photoMetadata) {
+      let photoHeaders = [`${TROPY}#path`]
+      if (this.options.photoMetadata && photoTemplate) {
+        photoHeaders.push(
+          ...photoTemplate.fields.map(f => f.property))
+      }
+      if (this.options.photoNotes) { photoHeaders.push(`${TROPY}#note`) }
+
+      [...Array(maxPhotos)].forEach(() => {
+        h.push(...photoHeaders)
+      })
+    }
+
+    return h
+  }
+
+  headerString(itemTemplate, photoTemplate = null, maxPhotos = 1) {
+    return stringify([this.header(itemTemplate, photoTemplate, maxPhotos)], {
+      quoted: this.options.quotes,
+      quoted_empty: this.options.quotes,
+      quoted_string: this.options.quotes
+    })
+  }
+
   loadExportTemplates(data) {
     const state = this.context.window.store?.getState()
     const inferredItemTemplate = data['@graph']?.[0]?.template
@@ -111,19 +105,16 @@ class CSVPlugin {
       state,
       this.options.itemTemplate,
       inferredItemTemplate)
-
     if (!itemTemplate)
       throw new Error(
         `Failed to find specified item template "${this.options.itemTemplate}" or fallback "${data['@graph']?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
       )
-
 
     const inferredPhotoTemplate = data['@graph']?.[0]?.photo?.[0]?.template
     const photoTemplate = this.options.photoMetadata ? loadTemplate(
       state,
       this.options.photoTemplate,
       inferredPhotoTemplate) : null
-
     if (this.options.photoMetadata && !photoTemplate)
       throw new Error(
         `Failed to find specified photo template "${this.options.photoTemplate}" or fallback "${data['@graph']?.[0]?.photo?.[0]?.template}". Please install one of these templates, or select a different template and try again.`
@@ -145,27 +136,105 @@ class CSVPlugin {
 
     const { itemTemplate, photoTemplate } = this.loadExportTemplates(data)
 
-    ws.write(`${this.headerString(itemTemplate, photoTemplate,
-      this.maxPhotos(data))}\n`)
+    ws.write(this.headerString(itemTemplate, photoTemplate,
+      this.maxPhotos(data)))
 
     let xData = await this.expand(data)
 
     for (let g of xData) {
       for (let item of g['@graph']) {
         try {
-          ws.write(`${this.columnsString(itemTemplate, photoTemplate, item)}\n`)
+          ws.write(this.columnsString(itemTemplate, photoTemplate, item))
         } catch (e) {
           this.logger.error({ stack: e.stack }, e.message)
         }
       }
     }
-
     ws.end()
   }
 
-  async import() {
-    this.logger.warn('CSV import not implemented yet.')
-    console.warn('CSV import not implemented yet.')
+  findUnknownHeaders(headerRow) {
+    const knownProperties = Object.keys(
+      this.context.window.store?.getState().ontology.props)
+    return headerRow.filter(h => !knownProperties.includes(h))
+  }
+
+  parseHeaders(csvHeaderRow) {
+    const firstPhotoHeaderIdx = csvHeaderRow.indexOf(`${TROPY}#path`)
+    if (firstPhotoHeaderIdx > 0) {
+      const nextPhotoHeaderIdx = csvHeaderRow.indexOf(
+        `${TROPY}#path`, firstPhotoHeaderIdx + 1)
+      const itemHeaders = csvHeaderRow.slice(0, firstPhotoHeaderIdx)
+      const photoHeaders = csvHeaderRow.slice(firstPhotoHeaderIdx,
+        (nextPhotoHeaderIdx > 0) ? nextPhotoHeaderIdx : csvHeaderRow.length)
+      return { itemHeaders, photoHeaders }
+    }
+    return { itemHeaders: csvHeaderRow } // no photo information present in csv
+  }
+
+  parseRow(row, itemKeys, photoKeys) {
+    // ignore comment rows
+    if (row[0].startsWith('#')) return
+
+    const itemData = [...row.slice(0, itemKeys.length)]
+    let item = Object.assign(...itemData.map(
+      (v, idx) => createValue(itemKeys[idx], v)
+    ))
+    item = addTemplateKey(item, this.options.itemTemplate)
+
+    if (photoKeys) {
+      const photos = splitArrayIntoChunks(
+        row.slice(itemKeys.length), photoKeys.length
+      )
+      item.photo = []
+
+      for (let p of photos) {
+        let photoData = Object.assign(...p.map(
+          (v, idx) => createValue(photoKeys[idx], v)
+        ))
+        item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
+      }
+    }
+    return item
+  }
+
+  async import(payload) {
+    this.logger.trace('importing items from CSV...')
+    let { files } = payload
+    if (!files)
+      files = await this.dialog.open({
+        filters: [{ name: 'CSV file', extensions: ['csv'] }],
+        properties: ['openFile', 'multiSelections']
+      })
+    if (!files) return
+
+    payload.data = []
+
+    for (const file of files) {
+      try {
+        const csvRows = parse(
+          await readFile(file),
+          { relaxColumnCount: true }
+        )
+
+        const headerRow = csvRows[0]
+        const invalidHeaders = this.findUnknownHeaders(headerRow)
+        if (invalidHeaders.length) {
+          this.dialog.fail(new Error(
+            `Ensure all headers are valid metadata property IDs. Unknown properties:\n  ${invalidHeaders.join(',\n  ')}`
+          ))
+          return
+        }
+        const { itemHeaders, photoHeaders } = this.parseHeaders(headerRow)
+
+        for (let row of csvRows.slice(1)) {
+          payload.data.push(this.parseRow(row, itemHeaders, photoHeaders))
+        }
+      } catch (e) {
+        this.dialog.fail(e)
+        this.logger.warn('failed to import from CSV', file, e)
+      }
+    }
   }
 
   get dialog() {
@@ -187,7 +256,6 @@ CSVPlugin.defaults = {
   photoTemplate: ''
 }
 
-
 class ClipboardWriter {
   constructor() {
     this.buffer = []
@@ -204,20 +272,5 @@ class ClipboardWriter {
   }
 }
 
-const list = (item, prop) => {
-  try {
-    return item[prop][0]['@list']
-  } catch (_) {
-    return []
-  }
-}
-
-const value = (val, sep = ',') =>
-    val ? val.map(v => v['@value']).join(sep) : null
-
-const loadTemplate = (state, id1, id2) => {
-  let t = state.ontology.template
-  return t[id1] || t[id2]
-}
 
 module.exports = CSVPlugin

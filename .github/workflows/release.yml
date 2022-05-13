@@ -4,6 +4,9 @@ on:
     tags:
       - v*.*
 
+env:
+  PLUGIN_NAME: tropy-plugin-csv
+
 jobs:
   create-release:
     name: Create release
@@ -11,8 +14,28 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v2
-    - uses: ncipollo/release-action@v1
-      with:
-        draft: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies and build
+        run: |
+          npm install
+          npm run build
+
+      - name: Create zip file
+        run: |
+          mkdir ${{ env.PLUGIN_NAME }}
+          cp index.js package.json third-party-licenses.txt ${{ env.PLUGIN_NAME }}
+          zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
+
+      - name: Create release and upload zip file
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.PLUGIN_NAME }}.zip
+          draft: true
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}

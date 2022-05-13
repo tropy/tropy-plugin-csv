@@ -11,7 +11,7 @@ describe('Generate csv row for item', () => {
     const numDefaultPhotoFields = defaultPhotoTemplate.fields.length
     const { itemSinglePhoto,
       itemSinglePhotoExpected } = require('./fixtures/item')
-    const expectedTags = itemSinglePhotoExpected.tags.join(' ')
+    const expectedTags = itemSinglePhotoExpected.tags.join(', ')
     const expectedPath = itemSinglePhotoExpected.photoPath
     const expectedMetadata = [
       itemSinglePhotoExpected.photoTitle,
@@ -29,7 +29,7 @@ describe('Generate csv row for item', () => {
       itemSinglePhotoExpected.folder,
       itemSinglePhotoExpected.identifier,
       itemSinglePhotoExpected.rights
-    ].map(x => `"${x}"`)
+    ].map(x => `"${x}"`).join(',')
 
     describe('with default settings', () => {
       const defaultPlugin = new CSVPlugin({
@@ -40,7 +40,7 @@ describe('Generate csv row for item', () => {
         itemTemplate: '',
         photoTemplate: ''
       })
-      const c = defaultPlugin.columns(defaultItemTemplate,
+      const c = defaultPlugin.columnsString(defaultItemTemplate,
         defaultPhotoTemplate, itemSinglePhoto)
       it('Generates at least as many columns as the item template', () => {
         assert.ok(c.length >= numDefaultItemFields)
@@ -51,7 +51,7 @@ describe('Generate csv row for item', () => {
       })
 
       it('Selects the required information for the item template', () => {
-        assert.deepEqual(c.slice(0, numDefaultItemFields), expectedItem)
+        assert.ok(c.startsWith(expectedItem))
       })
 
       it('Encloses strings in double quotes', () => {
@@ -61,19 +61,23 @@ describe('Generate csv row for item', () => {
 
     describe('with quotes false setting', () => {
       const plugin = new CSVPlugin({
-        photoNotes: true,
+        photoNotes: false,
         photoMetadata: false,
-        tags: true,
+        tags: false,
         quotes: false,
         itemTemplate: '',
         photoTemplate: ''
       })
-      const c = plugin.columns(defaultItemTemplate,
+      const c = plugin.columnsString(defaultItemTemplate,
         defaultPhotoTemplate, itemSinglePhoto)
 
-      it('does not quote values, and strips comma and newlines', () => {
-        assert.deepEqual(c.slice(0, numDefaultItemFields),
-          expectedItem.map(x => x.replaceAll(/[",\n\r]/g, '')))
+      it('only quotes fields containing commas or other escape chars', () => {
+        const firstFieldNotQuoted = itemSinglePhotoExpected.title.length
+        const lastFieldQuoted = itemSinglePhotoExpected.rights.length
+        assert.equal(c.slice(0, firstFieldNotQuoted),
+          expectedItem.replaceAll(/"/g, '').slice(0, firstFieldNotQuoted))
+        assert.equal(c.trim().slice(-1 * lastFieldQuoted),
+          expectedItem.slice(-1 * lastFieldQuoted))
       })
     })
 
