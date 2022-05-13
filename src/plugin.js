@@ -66,7 +66,8 @@ class CSVPlugin {
     return stringify([this.columns(itemTemplate, photoTemplate, item)], {
       quoted: this.options.quotes,
       quoted_empty: this.options.quotes,
-      quoted_string: this.options.quotes
+      quoted_string: this.options.quotes,
+      delimiter: this.options.delimiter
     })
   }
 
@@ -94,7 +95,8 @@ class CSVPlugin {
     return stringify([this.header(itemTemplate, photoTemplate, maxPhotos)], {
       quoted: this.options.quotes,
       quoted_empty: this.options.quotes,
-      quoted_string: this.options.quotes
+      quoted_string: this.options.quotes,
+      delimiter: this.options.delimiter
     })
   }
 
@@ -214,7 +216,7 @@ class CSVPlugin {
       try {
         const csvRows = parse(
           await readFile(file),
-          { relaxColumnCount: true }
+          { relaxColumnCount: true, delimiter: this.options.delimiter }
         )
 
         const headerRow = csvRows[0]
@@ -253,7 +255,8 @@ CSVPlugin.defaults = {
   quotes: true,
   tags: true,
   itemTemplate: '',
-  photoTemplate: ''
+  photoTemplate: '',
+  delimiter: ','
 }
 
 class ClipboardWriter {
