@@ -17,8 +17,12 @@ const loadTemplate = (state, id1, id2) => {
   return t[id1] || t[id2]
 }
 
-const getPhotoPath = (photo) =>
-  value(photo[`${TROPY}#path`]) || ''
+const getPhotoPath = (photo) => {
+  let path = value(photo[`${TROPY}#path`])
+  if (!path) return ''
+  const protocol = value(photo[`${TROPY}#protocol`])
+  return (protocol === 'file') ? path : `${protocol}://` + path
+}
 
 const getNotes = (photo, sep = ' --- ') =>
   list(photo, `${TROPY}#note`)

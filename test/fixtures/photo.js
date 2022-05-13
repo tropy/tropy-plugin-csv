@@ -1038,5 +1038,123 @@ module.exports = {
         }
       ]
     }
+  ],
+  singleRemotePhotoNoNote: [
+    {
+      '@type': [
+        'https://tropy.org/v1/tropy#Photo'
+      ],
+      'https://tropy.org/v1/tropy#angle': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#brightness': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#checksum': [
+        {
+          '@value': '5a9cad1911faffa1928eb8bae1aa0954'
+        }
+      ],
+      'https://tropy.org/v1/tropy#color': [
+        {
+          '@value': 'rgb(8,8,8,1)'
+        }
+      ],
+      'https://tropy.org/v1/tropy#contrast': [
+        {
+          '@value': 0
+        }
+      ],
+      'http://purl.org/dc/elements/1.1/date': [
+        {
+          '@type': 'https://tropy.org/v1/tropy#date',
+          '@value': '2022-05-01T14:09:26.000Z'
+        }
+      ],
+      'https://tropy.org/v1/tropy#filename': [
+        {
+          '@value': 'photo-1526336024174-e58f5cdd8e13'
+        }
+      ],
+      'https://tropy.org/v1/tropy#height': [
+        {
+          '@value': 1161
+        }
+      ],
+      'https://tropy.org/v1/tropy#hue': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#mimetype': [
+        {
+          '@value': 'image/jpeg'
+        }
+      ],
+      'https://tropy.org/v1/tropy#mirror': [
+        {
+          '@value': false
+        }
+      ],
+      'https://tropy.org/v1/tropy#negative': [
+        {
+          '@value': false
+        }
+      ],
+      'https://tropy.org/v1/tropy#orientation': [
+        {
+          '@value': 1
+        }
+      ],
+      'https://tropy.org/v1/tropy#page': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#path': [
+        {
+          '@value': 'images.unsplash.com/photo-1526336024174-e58f5cdd8e13'
+        }
+      ],
+      'https://tropy.org/v1/tropy#protocol': [
+        {
+          '@value': 'https'
+        }
+      ],
+      'https://tropy.org/v1/tropy#saturation': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#sharpen': [
+        {
+          '@value': 0
+        }
+      ],
+      'https://tropy.org/v1/tropy#size': [
+        {
+          '@value': 112670
+        }
+      ],
+      'https://tropy.org/v1/tropy#template': [
+        {
+          '@id': 'https://tropy.org/v1/templates/photo'
+        }
+      ],
+      'http://purl.org/dc/elements/1.1/title': [
+        {
+          '@value': 'photo-1526336024174-e58f5cdd8e13'
+        }
+      ],
+      'https://tropy.org/v1/tropy#width': [
+        {
+          '@value': 774
+        }
+      ]
+    }
   ]
 }
