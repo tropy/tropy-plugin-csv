@@ -42,6 +42,13 @@
       "hint": "The id of the Tropy template to use for photos. The template determines which fields will be exported. If left empty, the template for the first item's first photo will be used. For import, the selected template will be applied to imported photos."
     },
     {
+      "field": "delimiter",
+      "label": "Delimiter",
+      "hint": "The character used to separate fields in the CSV file.",
+      "default": ",",
+      "required": true
+    },
+    {
       "field": "tags",
       "label": "Export tags?",
       "type": "boolean",
