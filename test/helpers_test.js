@@ -5,7 +5,7 @@ const { getNotes, getPhotoPath,
   value, splitArrayIntoChunks } = require('../src/helpers')
 const { singlePhotoNoNote,
   singlePhotoSingleNote,
-  singlePhotoManyNote } = require('./fixtures/photo')
+  singlePhotoManyNote, singleRemotePhotoNoNote } = require('./fixtures/photo')
 const { itemNoPhoto } = require('./fixtures/item')
 
 function getNoteFromPhotoFixture(photo, idx = 0) {
@@ -54,11 +54,16 @@ describe('Get photo path', () => {
     delete fixtureCopy['https://tropy.org/v1/tropy#path'][0]['@value']
     assert.equal(getPhotoPath(fixtureCopy), '')
   })
+
   it('returns empty string if no path key present', () => {
     const fixtureCopy = JSON.parse(JSON.stringify(singlePhotoNoNote))[0]
     delete fixtureCopy['https://tropy.org/v1/tropy#path']
     assert.equal(getPhotoPath(fixtureCopy), '')
+  })
 
+  it('prepends the protocol if not file', () => {
+    const expectedProtocol = singleRemotePhotoNoNote[0]['https://tropy.org/v1/tropy#protocol'][0]['@value']
+    assert.ok(getPhotoPath(singleRemotePhotoNoNote[0]).startsWith(`${expectedProtocol}://`))
   })
 })
 describe('value', () => {
