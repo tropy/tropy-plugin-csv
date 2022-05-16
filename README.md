@@ -16,7 +16,7 @@ The CSV file must have column names as the first row, and these names must all b
 
 Each row in the CSV file represents an item in Tropy. The first few columns in the CSV file, until either the end of the CSV or a column with the title `https://tropy.org/v1/tropy#path` is present, are for metadata that will appear on the imported *item*.
 
-If you wish to include a photo for your item, there must be a `https://tropy.org/v1/tropy#path` column *after* (to the right of) all of the item metadata columns, which contains the path to the photo. Any photo metadata columns come after this, and finally a `https://tropy.org/v1/tropy#note` column if you wish to include notes for that photo.
+If you wish to include a photo for your item, there must be a `https://tropy.org/v1/tropy#path` column *after* (to the right of) all of the item metadata columns, which contains the path to the photo. The path can be a URL, absolute path or relative path. If it is a relative path, this will be interpreted relative to the location of the CSV file at the time of import. Any photo metadata columns come after the path column, and finally a `https://tropy.org/v1/tropy#note` column if you wish to include notes for that photo.
 
 If you wish to include multiple photos for an item, add more copies of the group of columns used for the first photo (beginning with `https://tropy.org/v1/tropy#path` and optionally followed by metadata columns and notes) to the end of that row in the CSV file, one copy of the group of columns per photo. You must use the same columns for all photos in an import file, even if some of the columns are blank for some photos.
 
