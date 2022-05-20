@@ -1,7 +1,7 @@
 {
   "name": "tropy-plugin-csv",
   "version": "3.0.0-beta.1",
-  "description": "Tropy Plugin for importing from and exporting to CSV files.",
+  "description": "Tropy plugin for importing and exporting CSV files.",
   "main": "index.js",
   "scripts": {
     "test": "electron-mocha --renderer test",
