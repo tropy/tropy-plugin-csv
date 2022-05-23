@@ -1,4 +1,6 @@
-# tropy-plugin-csv
+<p align="center"><img src="icon.svg"></p>
+
+<h1 align="center">tropy-plugin-csv</h1>
 
 Tropy plugin to import items from a CSV file, and export your items to CSV.
 
