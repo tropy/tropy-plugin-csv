@@ -2,7 +2,7 @@
   "name": "tropy-plugin-csv",
   "productName": "CSV",
   "version": "3.0.2",
-  "description": "Tropy plugin for importing and exporting CSV files.",
+  "description": "Import and export CSV files.",
   "icon": "icon.svg",
   "main": "index.js",
   "scripts": {
