@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/tropy/tropy-plugin-csv#readme",
   "hooks": {
-    "export": true,
-    "import": true
+    "import": true,
+    "export": true
   },
   "options": [
     {
