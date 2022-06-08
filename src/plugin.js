@@ -6,6 +6,18 @@ const { clipboard } = require('electron')
 const { homedir } = require('os')
 const { stringify } = require('csv-stringify/sync')
 const { parse } = require('csv-parse/sync')
+const {
+  list,
+  value,
+  loadTemplate,
+  getPhotoPath,
+  getNotes,
+  TROPY,
+  addTemplateKey,
+  splitArrayIntoChunks,
+  createValue,
+  parseProtocol
+} = require('./helpers')
 const { dirname } = require('path')
 
 class CSVPlugin {
@@ -189,9 +201,10 @@ class CSVPlugin {
       item.photo = []
 
       for (let p of photos) {
-        let photoData = Object.assign(...p.map(
-          (v, idx) => createValue(photoKeys[idx], v)
-        ))
+        let photoData = Object.assign(
+          ...p.map((v, idx) => createValue(photoKeys[idx], v))
+        )
+        parseProtocol(photoData, this.options.baseDirectory)
         item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
       }
     }
@@ -273,6 +286,5 @@ class ClipboardWriter {
     this.buffer.push(string)
   }
 }
-
 
 module.exports = CSVPlugin
