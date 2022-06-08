@@ -184,7 +184,7 @@ class CSVPlugin {
     return { itemHeaders: csvHeaderRow } // no photo information present in csv
   }
 
-  parseRow(row, itemKeys, photoKeys) {
+  parseRow(row, itemKeys, photoKeys, baseDirectory) {
     // ignore comment rows
     if (row[0].startsWith('#')) return
 
@@ -204,7 +204,7 @@ class CSVPlugin {
         let photoData = Object.assign(
           ...p.map((v, idx) => createValue(photoKeys[idx], v))
         )
-        parseProtocol(photoData, this.options.baseDirectory)
+        parseProtocol(photoData, baseDirectory)
         item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
       }
     }
@@ -221,7 +221,6 @@ class CSVPlugin {
       })
     if (!files) return
 
-    this.options.baseDirectory = dirname(files[0])
     payload.data = []
 
     for (const file of files) {
@@ -240,9 +239,15 @@ class CSVPlugin {
           return
         }
         const { itemHeaders, photoHeaders } = this.parseHeaders(headerRow)
+        const baseDirectory = dirname(file)
 
         for (let row of csvRows.slice(1)) {
-          payload.data.push(this.parseRow(row, itemHeaders, photoHeaders))
+          payload.data.push(this.parseRow(
+            row,
+            itemHeaders,
+            photoHeaders,
+            baseDirectory
+          ))
         }
       } catch (e) {
         this.dialog.fail(e)
