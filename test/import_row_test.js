@@ -1,6 +1,7 @@
 'use strict'
 
 const assert = require('assert')
+const { platform } = require('process')
 const CSVPlugin = require('../src/plugin')
 const TROPY = 'https://tropy.org/v1/tropy'
 
@@ -15,14 +16,26 @@ const photoHeaders = [
 ]
 const rowNoPhoto = ['2022-01-02', 'title', '']
 const rowNoTitle = ['2022-01-02', '', '']
-const rowSinglePhoto = ['2022-01-03', 'title1', 'tag1, tag3',
-  '/home/username/photo.jpg', '']
-const rowManyPhoto = ['2022-01-04', 'title2', 'tag2',
-  '/home/username/photo1.jpg', 'a note',
-  '/home/username/photo2.jpg', 'some note --- another note, with a comma']
+const rowSinglePhoto = [
+  '2022-01-03',
+  'title1',
+  'tag1, tag3',
+  (platform === 'win32') ? 'D:\\user\\photo.jpg' : '/home/user/photo.jpg',
+  '']
+const rowManyPhoto = [
+  '2022-01-04',
+  'title2',
+  'tag2',
+  (platform === 'win32') ? 'D:\\user\\photo1.jpg' : '/home/user/photo1.jpg',
+  'a note',
+  (platform === 'win32') ? 'D:\\user\\photo2.jpg' : '/home/user/photo2.jpg',
+  'some note --- another note, with a comma']
 
-function generatePhoto(path, note = null) {
-  const photo = { 'https://tropy.org/v1/tropy#path': [{ '@value': path  }] }
+function generatePhoto(path, note = null, protocol = 'file') {
+  const photo = {
+    'https://tropy.org/v1/tropy#path': [{ '@value': path }],
+    'https://tropy.org/v1/tropy#protocol': [{ '@value': protocol }]
+  }
   if (note)
     photo[`${TROPY}#note`] = [{ '@list': [
       {

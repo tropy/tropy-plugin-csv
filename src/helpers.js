@@ -1,3 +1,5 @@
+const { resolve } = require('path')
+const { URL, pathToFileURL, fileURLToPath } = require('url')
 
 const TROPY = 'https://tropy.org/v1/tropy'
 
@@ -29,7 +31,6 @@ const getNotes = (photo, sep = ' --- ') =>
     .map(x => value(x[`${TROPY}#text`]))
     .join(sep)
 
-
 const createNoteValue = (k, v, sep = ' --- ') => {
   const note = v.split(sep).map(
     val => ({
@@ -42,7 +43,6 @@ const createNoteValue = (k, v, sep = ' --- ') => {
         }]
     }))
   return { [k]: [{ '@list': note }] }
-
 }
 
 const createValue = (k, v) => {
@@ -58,6 +58,43 @@ const createValue = (k, v) => {
     default:
       return { [k]: [{ '@value': v }] }
   }
+}
+
+function argToURL(path, relativeTo = process.cwd()) {
+  // Subtle: only try to parse arguments as URLs for supported protocols,
+  // otherwise win32 paths with drive letters may get interpreted as URLs.
+  if (!(/^(file|https?):/i).test(path))
+    return pathToFileURL(resolve(relativeTo, path))
+  try {
+    return new URL(path)
+  } catch (e) {
+    if (e.code !== 'ERR_INVALID_URL')
+      throw e
+
+    return pathToFileURL(resolve(relativeTo, path))
+  }
+}
+
+function getProtocolAndPath(path, relativeTo) {
+  const url = argToURL(path, relativeTo)
+  if (url.protocol === 'file:') {
+    return {
+      path: fileURLToPath(url.href),
+      protocol: 'file'
+    }
+  } else {
+    return {
+      path: url.href.replace((/^https?:\/\//i), ''), // remove the protocol
+      protocol: url.protocol.replace(':', '')
+    }
+  }
+}
+const parseProtocol = (photo, baseDirectory) => {
+  const rawPath = photo[`${TROPY}#path`][0]['@value']
+  const { protocol, path } = getProtocolAndPath(rawPath, baseDirectory)
+  photo[`${TROPY}#path`][0]['@value'] = path
+  Object.assign(photo, createValue(`${TROPY}#protocol`, protocol))
+  return photo
 }
 
 const addTemplateKey = (x, templateId) => {
@@ -78,6 +115,14 @@ const splitArrayIntoChunks = (arr, chunkSize) => {
 }
 
 module.exports = {
-  list, value, loadTemplate, getPhotoPath, getNotes,
-  TROPY, addTemplateKey, splitArrayIntoChunks, createValue
+  list,
+  value,
+  loadTemplate,
+  getPhotoPath,
+  getNotes,
+  TROPY,
+  addTemplateKey,
+  splitArrayIntoChunks,
+  createValue,
+  parseProtocol
 }

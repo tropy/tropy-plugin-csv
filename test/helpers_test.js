@@ -2,16 +2,30 @@
 
 const assert = require('assert')
 const { getNotes, getPhotoPath,
-  value, splitArrayIntoChunks } = require('../src/helpers')
+  value, splitArrayIntoChunks, parseProtocol } = require('../src/helpers')
 const { singlePhotoNoNote,
   singlePhotoSingleNote,
-  singlePhotoManyNote, singleRemotePhotoNoNote } = require('./fixtures/photo')
+  singlePhotoManyNote,
+  singleRemotePhotoNoNote,
+  photoOnImportHttps,
+  photoOnImportFileNoProtocol,
+  photoOnImportWindowsFile,
+  photoOnImportFileProtocol,
+  photoOnImportWindowsFileRelative } = require('./fixtures/photo')
 const { itemNoPhoto } = require('./fixtures/item')
+const { cwd, platform } = require('process')
+const path = require('path')
 
 function getNoteFromPhotoFixture(photo, idx = 0) {
   return photo[0]['https://tropy.org/v1/tropy#note'][0]['@list'][idx]['https://tropy.org/v1/tropy#text'][0]['@value']
 }
 
+function getProtocolFromPhoto(photo) {
+  return photo['https://tropy.org/v1/tropy#protocol']?.[0]['@value']
+}
+function getPathFromPhoto(photo) {
+  return photo['https://tropy.org/v1/tropy#path'][0]['@value']
+}
 
 describe('Get photo notes', () => {
   it('returns an empty string when photo has no notes', () => {
@@ -83,7 +97,6 @@ describe('value', () => {
   })
 })
 
-
 describe('split array into chunks', () => {
   const input = [1, 2, 3, 4, 5, 6]
   const chunkSize = 2
@@ -101,4 +114,64 @@ describe('split array into chunks', () => {
   it('order of items is maintained', () => {
     assert.deepEqual(actual.flat(), input)
   })
+})
+
+describe('Parse protocol', () => {
+  it('assigns https protocol when path is https url', () => {
+    const inputPath = getPathFromPhoto(photoOnImportHttps)
+    const parsed = parseProtocol(photoOnImportHttps)
+    assert.equal(getProtocolFromPhoto(parsed), 'https')
+    // it removes the protocol from the path
+    assert.ok(!(getPathFromPhoto(parsed).startsWith('https://')))
+    // and keeps all the parts of the URL
+    assert.equal(getPathFromPhoto(parsed), inputPath.replace('https://', ''))
+  })
+
+  it('assigns file protocol when path is absolute filepath', () => {
+    const photo = (platform === 'win32') ?
+      photoOnImportWindowsFile : photoOnImportFileProtocol
+    const inputPath = getPathFromPhoto(photo)
+    const parsed = parseProtocol(photo)
+
+    assert.equal(getProtocolFromPhoto(parsed), 'file')
+    assert.ok(!(getPathFromPhoto(parsed).startsWith('file://')))
+    assert.equal(getPathFromPhoto(parsed), inputPath.replace('file://', ''))
+  })
+
+  if (platform !== 'win32') {
+    it('calculates absolute path when input is relative posix filepath', () => {
+      const inputPath = getPathFromPhoto(photoOnImportFileNoProtocol)
+      const csvDirectory = path.join(cwd(), 'test')
+      const parsed = parseProtocol(photoOnImportFileNoProtocol, csvDirectory)
+
+      assert.equal(getProtocolFromPhoto(parsed), 'file')
+
+      // generated path is not relative
+      assert.ok(!(getPathFromPhoto(parsed).startsWith('./')))
+      // path includes the absolute path to the directory of the input CSV file
+      assert.ok(getPathFromPhoto(parsed).startsWith(csvDirectory))
+      // and the whole input path is carried through to the output path
+      assert.ok(getPathFromPhoto(parsed).endsWith(inputPath.replace('./', '')))
+    })
+  } else {
+    it('assigns file protocol when path is relative windows filepath', () => {
+      const inputPath = getPathFromPhoto(photoOnImportWindowsFileRelative)
+      const csvDirectory = path.join(cwd(), 'test')
+
+      const parsed = parseProtocol(photoOnImportWindowsFileRelative,
+        csvDirectory)
+
+      assert.equal(getProtocolFromPhoto(parsed), 'file')
+      // path starts with absolute path to the directory of the input CSV file
+      assert.equal(
+        getPathFromPhoto(parsed).slice(0, csvDirectory.length),
+        csvDirectory
+      )
+      // and the whole input path is carried through to the output path
+      assert.equal(
+        getPathFromPhoto(parsed).slice(-1 * inputPath.length),
+        inputPath
+      )
+    })
+  }
 })

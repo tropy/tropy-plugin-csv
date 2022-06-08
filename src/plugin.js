@@ -6,9 +6,19 @@ const { clipboard } = require('electron')
 const { homedir } = require('os')
 const { stringify } = require('csv-stringify/sync')
 const { parse } = require('csv-parse/sync')
-const { list, value, loadTemplate, getPhotoPath, getNotes, TROPY,
-  addTemplateKey, splitArrayIntoChunks, createValue } = require('./helpers')
-
+const {
+  list,
+  value,
+  loadTemplate,
+  getPhotoPath,
+  getNotes,
+  TROPY,
+  addTemplateKey,
+  splitArrayIntoChunks,
+  createValue,
+  parseProtocol
+} = require('./helpers')
+const { dirname } = require('path')
 
 class CSVPlugin {
   constructor(options, context) {
@@ -174,7 +184,7 @@ class CSVPlugin {
     return { itemHeaders: csvHeaderRow } // no photo information present in csv
   }
 
-  parseRow(row, itemKeys, photoKeys) {
+  parseRow(row, itemKeys, photoKeys, baseDirectory) {
     // ignore comment rows
     if (row[0].startsWith('#')) return
 
@@ -191,9 +201,10 @@ class CSVPlugin {
       item.photo = []
 
       for (let p of photos) {
-        let photoData = Object.assign(...p.map(
-          (v, idx) => createValue(photoKeys[idx], v)
-        ))
+        let photoData = Object.assign(
+          ...p.map((v, idx) => createValue(photoKeys[idx], v))
+        )
+        parseProtocol(photoData, baseDirectory)
         item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
       }
     }
@@ -228,9 +239,15 @@ class CSVPlugin {
           return
         }
         const { itemHeaders, photoHeaders } = this.parseHeaders(headerRow)
+        const baseDirectory = dirname(file)
 
         for (let row of csvRows.slice(1)) {
-          payload.data.push(this.parseRow(row, itemHeaders, photoHeaders))
+          payload.data.push(this.parseRow(
+            row,
+            itemHeaders,
+            photoHeaders,
+            baseDirectory
+          ))
         }
       } catch (e) {
         this.dialog.fail(e)
@@ -274,6 +291,5 @@ class ClipboardWriter {
     this.buffer.push(string)
   }
 }
-
 
 module.exports = CSVPlugin

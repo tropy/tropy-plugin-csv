@@ -1156,5 +1156,42 @@ module.exports = {
         }
       ]
     }
-  ]
+  ],
+  photoOnImportHttps: {
+    'https://tropy.org/v1/tropy#path': [
+      {
+        '@value': 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1443&q=80'
+      }
+    ]
+  },
+  photoOnImportFileProtocol: {
+    'https://tropy.org/v1/tropy#path': [
+      {
+        '@value': 'file:///home/caro/Downloads/ChapelHillWeekly.pdf'
+      }
+    ]
+  },
+  photoOnImportFileNoProtocol: {
+    'https://tropy.org/v1/tropy#path': [
+      {
+        '@value': './ChapelHillWeekly.pdf'
+      }
+    ]
+  },
+  photoOnImportWindowsFile: {
+    'https://tropy.org/v1/tropy#path': [
+      {
+        '@value': 'C:\\Documents\\Newsletters\\Summer2018.pdf'
+      }
+    ]
+  },
+  photoOnImportWindowsFileRelative: {
+    'https://tropy.org/v1/tropy#path': [
+      {
+        '@value': 'subdirectory\\TravelBrochure.pdf'
+      }
+    ]
+  }
 }
+
+
