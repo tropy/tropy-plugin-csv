@@ -6,9 +6,7 @@ const { clipboard } = require('electron')
 const { homedir } = require('os')
 const { stringify } = require('csv-stringify/sync')
 const { parse } = require('csv-parse/sync')
-const { list, value, loadTemplate, getPhotoPath, getNotes, TROPY,
-  addTemplateKey, splitArrayIntoChunks, createValue } = require('./helpers')
-
+const { dirname } = require('path')
 
 class CSVPlugin {
   constructor(options, context) {
@@ -210,6 +208,7 @@ class CSVPlugin {
       })
     if (!files) return
 
+    this.options.baseDirectory = dirname(files[0])
     payload.data = []
 
     for (const file of files) {
