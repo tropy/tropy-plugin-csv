@@ -8,7 +8,21 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.friendlyName }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        arch:
+          - x64
+        include:
+          - os: ubuntu-latest
+            friendlyName: Linux
+          - os: windows-latest
+            friendlyName: Windows
 
     steps:
       - name: Checkout repository
@@ -25,6 +39,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test
-        run: xvfb-run npm run test
+      - name: Run tests
+        if: matrix.os != 'ubuntu-latest'
+        run: npm test
+
+      - name: Run tests under xvfb
+        if: matrix.os == 'ubuntu-latest'
+        run: xvfb-run npm test
+
 
