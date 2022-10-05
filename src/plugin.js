@@ -229,8 +229,11 @@ class CSVPlugin {
           await readFile(file),
           { relaxColumnCount: true, delimiter: this.options.delimiter }
         )
-
-        const headerRow = csvRows[0]
+        const headerRow = this.options.customHeaders ?
+          parse(this.options.customHeaders,
+            { delimiter: this.options.delimiter }
+          )[0] :
+          csvRows[0]
         const invalidHeaders = this.findUnknownHeaders(headerRow)
         if (invalidHeaders.length) {
           this.dialog.fail(new Error(
@@ -273,7 +276,8 @@ CSVPlugin.defaults = {
   tags: true,
   itemTemplate: '',
   photoTemplate: '',
-  delimiter: ','
+  delimiter: ',',
+  customHeaders: ''
 }
 
 class ClipboardWriter {

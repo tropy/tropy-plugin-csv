@@ -44,6 +44,13 @@
       "hint": "The id of the Tropy template to use for photos. The template determines which fields will be exported. If left empty, the template for the first item's first photo will be used. For import, the selected template will be applied to imported photos."
     },
     {
+      "field": "customHeaders",
+      "label": "Custom column titles",
+      "placeholder": "Override column titles in input file (Optional)",
+      "type": "string",
+      "hint": "If the input CSV file doesn't have metadata properties for column titles, define the metadata properties here, in the same format as the CSV file."
+    },
+    {
       "field": "delimiter",
       "label": "Delimiter",
       "hint": "The character used to separate fields in the CSV file.",
