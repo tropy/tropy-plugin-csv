@@ -100,7 +100,7 @@
     "electron-mocha": "^11.0.2",
     "eslint": "^8.14.0",
     "rollup": "^2.72.1",
-    "rollup-plugin-license": "^2.7.0"
+    "rollup-plugin-license": "^2.8.1"
   },
   "dependencies": {
     "csv-parse": "^5.0.4",
