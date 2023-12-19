@@ -15,7 +15,7 @@ const photoHeaders = [
   `${TROPY}#note`
 ]
 const rowNoPhoto = ['2022-01-02', 'title', '']
-const rowNoTitle = ['2022-01-02', '', '']
+const rowNoDate = ['', 'title', '']
 const rowSinglePhoto = [
   '2022-01-03',
   'title1',
@@ -62,9 +62,9 @@ describe('Parse row', () => {
     assert.deepEqual(actual, generateExpectedItem(rowNoPhoto[0], rowNoPhoto[1]))
   })
   it('Does not add key to item if value is empty in csv', () => {
-    const actual = plugin.parseRow(rowNoTitle, itemHeaders, photoHeaders)
-    assert.equal(actual['http://purl.org/dc/terms/title'], undefined)
-    assert.ok(actual['http://purl.org/dc/elements/1.1/date'] !== undefined)
+    const actual = plugin.parseRow(rowNoDate, itemHeaders, photoHeaders)
+    assert.ok(actual['http://purl.org/dc/terms/title'] !== undefined)
+    assert.equal(actual['http://purl.org/dc/elements/1.1/date'], undefined)
   })
   it('Item has no photos if no photo headers present', () => {
     const actual = plugin.parseRow(rowSinglePhoto, itemHeaders, undefined)

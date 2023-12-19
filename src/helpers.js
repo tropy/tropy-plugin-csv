@@ -46,7 +46,7 @@ const createNoteValue = (k, v, sep = ' --- ') => {
 }
 
 const createValue = (k, v) => {
-  if (!v) return
+  if (!v) return {}
   switch (k) {
     case (`${TROPY}#note`):
       return createNoteValue(k, v)
