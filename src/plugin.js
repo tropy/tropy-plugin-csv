@@ -225,10 +225,12 @@ class CSVPlugin {
 
     for (const file of files) {
       try {
-        const csvRows = parse(
-          await readFile(file),
-          { relaxColumnCount: true, delimiter: this.options.delimiter }
-        )
+        const csvRows = parse(await readFile(file), {
+          relaxColumnCount: true,
+          delimiter: this.options.delimiter,
+          bom: true,
+          skipEmptyLines: true,
+        });
         const headerRow = this.options.customHeaders ?
           parse(this.options.customHeaders,
             { delimiter: this.options.delimiter }
