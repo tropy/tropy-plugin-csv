@@ -90,7 +90,10 @@ function getProtocolAndPath(path, relativeTo) {
   }
 }
 const parseProtocol = (photo, baseDirectory) => {
-  const rawPath = photo[`${TROPY}#path`][0]['@value']
+  const rawPath = photo[`${TROPY}#path`]?.[0]['@value']
+  if (!rawPath) {
+    return photo
+  }
   const { protocol, path } = getProtocolAndPath(rawPath, baseDirectory)
   photo[`${TROPY}#path`][0]['@value'] = path
   Object.assign(photo, createValue(`${TROPY}#protocol`, protocol))

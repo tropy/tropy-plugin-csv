@@ -203,9 +203,16 @@ class CSVPlugin {
       for (let p of photos) {
         let photoData = Object.assign(
           ...p.map((v, idx) => createValue(photoKeys[idx], v))
-        )
-        parseProtocol(photoData, baseDirectory)
-        item.photo.push(addTemplateKey(photoData, this.options.photoTemplate))
+        );
+        if (photoData[`${TROPY}#path`] !== undefined) {
+          parseProtocol(photoData, baseDirectory);
+          item.photo.push(
+            addTemplateKey(photoData, this.options.photoTemplate)
+          );
+        } else {
+          // Don't fail if there's no TROPY/#path values for that row
+          console.warn("No photo paths parsed for row", row)
+        }
       }
     }
     return item
