@@ -15,7 +15,7 @@ const photoHeaders = [
   `${TROPY}#note`
 ]
 const rowNoPhoto = ['2022-01-02', 'title', '']
-const rowNoTitle = ['2022-01-02', '', '']
+const rowNoDate = ['', 'title', '']
 const rowSinglePhoto = [
   '2022-01-03',
   'title1',
@@ -30,6 +30,17 @@ const rowManyPhoto = [
   'a note',
   (platform === 'win32') ? 'D:\\user\\photo2.jpg' : '/home/user/photo2.jpg',
   'some note --- another note, with a comma']
+
+const rowMissingPhoto = [
+  '2022-01-04',
+  'title2',
+  'tag2',
+  (platform === 'win32') ? 'D:\\user\\photo1.jpg' : '/home/user/photo1.jpg',
+  'a note',
+  (platform === 'win32') ? 'D:\\user\\photo2.jpg' : '/home/user/photo2.jpg',
+  'some note --- another note, with a comma',
+  // No photo path provided
+  '',  'this note should be dropped?']
 
 function generatePhoto(path, note = null, protocol = 'file') {
   const photo = {
@@ -62,9 +73,9 @@ describe('Parse row', () => {
     assert.deepEqual(actual, generateExpectedItem(rowNoPhoto[0], rowNoPhoto[1]))
   })
   it('Does not add key to item if value is empty in csv', () => {
-    const actual = plugin.parseRow(rowNoTitle, itemHeaders, photoHeaders)
-    assert.equal(actual['http://purl.org/dc/terms/title'], undefined)
-    assert.ok(actual['http://purl.org/dc/elements/1.1/date'] !== undefined)
+    const actual = plugin.parseRow(rowNoDate, itemHeaders, photoHeaders)
+    assert.ok(actual['http://purl.org/dc/terms/title'] !== undefined)
+    assert.equal(actual['http://purl.org/dc/elements/1.1/date'], undefined)
   })
   it('Item has no photos if no photo headers present', () => {
     const actual = plugin.parseRow(rowSinglePhoto, itemHeaders, undefined)
@@ -81,6 +92,14 @@ describe('Parse row', () => {
     assert.equal(actual.photo.length, 2)
     assert.deepEqual(actual['photo'][0],
       generatePhoto(rowManyPhoto[3], rowManyPhoto[4]))
+  })
+  it('Photo and note not imported if no path for photos', () => {
+    const actual = plugin.parseRow(rowMissingPhoto, itemHeaders, photoHeaders)
+    assert.equal(actual.photo.length, 2)
+    assert.equal(
+      JSON.stringify(actual).includes('This note should be dropped?'),
+      false
+    )
   })
   it('Photo has no notes if notes not present in CSV', () => {
     const actual = plugin.parseRow(rowSinglePhoto, itemHeaders, photoHeaders)
