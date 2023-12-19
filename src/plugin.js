@@ -203,15 +203,15 @@ class CSVPlugin {
       for (let p of photos) {
         let photoData = Object.assign(
           ...p.map((v, idx) => createValue(photoKeys[idx], v))
-        );
+        )
         if (photoData[`${TROPY}#path`] !== undefined) {
-          parseProtocol(photoData, baseDirectory);
+          parseProtocol(photoData, baseDirectory)
           item.photo.push(
             addTemplateKey(photoData, this.options.photoTemplate)
-          );
+          )
         } else {
           // Don't fail if there's no TROPY/#path values for that row
-          console.warn("No photo paths parsed for row", row)
+          console.warn('No photo paths parsed for row', row)
         }
       }
     }
@@ -236,8 +236,8 @@ class CSVPlugin {
           relaxColumnCount: true,
           delimiter: this.options.delimiter,
           bom: true,
-          skipEmptyLines: true,
-        });
+          skipEmptyLines: true
+        })
         const headerRow = this.options.customHeaders ?
           parse(this.options.customHeaders,
             { delimiter: this.options.delimiter }

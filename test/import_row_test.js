@@ -40,7 +40,7 @@ const rowMissingPhoto = [
   (platform === 'win32') ? 'D:\\user\\photo2.jpg' : '/home/user/photo2.jpg',
   'some note --- another note, with a comma',
   // No photo path provided
-'',  'this note should be dropped?']
+  '',  'this note should be dropped?']
 
 function generatePhoto(path, note = null, protocol = 'file') {
   const photo = {
@@ -96,7 +96,10 @@ describe('Parse row', () => {
   it('Photo and note not imported if no path for photos', () => {
     const actual = plugin.parseRow(rowMissingPhoto, itemHeaders, photoHeaders)
     assert.equal(actual.photo.length, 2)
-    assert.equal(JSON.stringify(actual).includes('this note should be dropped?'),false)
+    assert.equal(
+      JSON.stringify(actual).includes('This note should be dropped?'),
+      false
+    )
   })
   it('Photo has no notes if notes not present in CSV', () => {
     const actual = plugin.parseRow(rowSinglePhoto, itemHeaders, photoHeaders)
